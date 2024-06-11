@@ -1,6 +1,6 @@
 FROM python:3.12
 
-WORKDIR /microservice4
+WORKDIR /microservice5
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -10,12 +10,12 @@ RUN apt-get update && apt-get install -y \
 
 RUN pip instal poetry 
 
-COPY . /microservice4/
+COPY . /microservice5/
 
 RUN poetry config virtualenvs.create false
 
 RUN poetry install
 
-EXPOSE 8005
+EXPOSE 8006
 
-CMD ["poetry", "run", "uvicorn", "service4.main:app", "--host", "0.0.0.0", "--reload"]
+CMD ["poetry", "run", "uvicorn", "service5.main:app", "--host", "0.0.0.0", "--reload"]

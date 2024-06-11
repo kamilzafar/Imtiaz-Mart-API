@@ -8,7 +8,7 @@ RUN apt-get update && apt-get install -y \
     protobuf-compiler \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip instal poetry 
+RUN pip install poetry 
 
 COPY . /microservice1/
 
@@ -16,6 +16,6 @@ RUN poetry config virtualenvs.create false
 
 RUN poetry install
 
-EXPOSE 8002
+EXPOSE 8003
 
 CMD ["poetry", "run", "uvicorn", "service1.main:app", "--host", "0.0.0.0", "--reload"]

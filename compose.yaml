@@ -12,7 +12,7 @@ services:
       context: ./User_Service
       dockerfile: Dockerfile
     ports:
-      - "8002:8000"
+      - "8003:8000"
     volumes:
       - ./service1:/microservice1/
   service2:
@@ -20,7 +20,7 @@ services:
       context: ./Product_Service
       dockerfile: Dockerfile
     ports:
-      - "8003:8000"
+      - "8004:8000"
     volumes:
       - ./service2:/microservice2/
   service3:
@@ -28,7 +28,7 @@ services:
       context: ./Order_Service
       dockerfile: Dockerfile
     ports:
-      - "8004:8000"
+      - "8005:8000"
     volumes:
       - ./service3:/microservice3/
   service4:
@@ -36,7 +36,7 @@ services:
       context: ./Inventory_Service
       dockerfile: Dockerfile
     ports:
-      - "8005:8000"
+      - "8006:8000"
     volumes:
       - ./service4:/microservice4/
   service5:
@@ -44,7 +44,7 @@ services:
       context: ./Notification_Service
       dockerfile: Dockerfile
     ports:
-      - "8006:8000"
+      - "8007:8000"
     volumes:
       - ./service5:/microservice5/
   service6:
@@ -52,7 +52,7 @@ services:
       context: ./Payment_Service
       dockerfile: Dockerfile
     ports:
-      - "8007:8000"
+      - "8008:8000"
     volumes:
       - ./service6:/microservice6/
   kong-migrations:

@@ -1,0 +1,9 @@
+services:
+  service1:
+    build: 
+      context: ./'Inventory Service'
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./'Inventory Service':/service1/

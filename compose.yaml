@@ -109,7 +109,9 @@ services:
     ports:
       - "8003:8085"
     volumes:
-      - ./service1:/microservice1/
+      - ./User_Service:/microservice1/
+    depends_on:
+      - postgres_db
   
   service2:
     build: 
@@ -118,7 +120,9 @@ services:
     ports:
       - "8004:8086"
     volumes:
-      - ./service2:/microservice2/
+      - ./Product_Service:/microservice2/
+    depends_on:
+      - postgres_db
   
   service3:
     build: 
@@ -127,7 +131,9 @@ services:
     ports:
       - "8005:8087"
     volumes:
-      - ./service3:/microservice3/
+      - ./Order_Service:/microservice3/
+    depends_on:
+      - postgres_db
   
   service4:
     build: 
@@ -136,7 +142,9 @@ services:
     ports:
       - "8006:8088"
     volumes:
-      - ./service4:/microservice4/
+      - ./Inventory_Service:/microservice4/
+    depends_on:
+      - postgres_db
   
   service5:
     build: 
@@ -145,7 +153,9 @@ services:
     ports:
       - "8007:8089"
     volumes:
-      - ./service5:/microservice5/
+      - ./Notification_Service:/microservice5/
+    depends_on:
+      - postgres_db
   
   service6:
     build: 
@@ -154,14 +164,16 @@ services:
     ports:
       - "8008:8090"
     volumes:
-      - ./service6:/microservice6/
+      - ./Payment_Service:/microservice6/
+    depends_on:
+      - postgres_db
   
   postgres_db:
     image: postgres:latest # Use the official PostgreSQL image
     restart: always
     container_name: PostgresCont
     environment:
-      - POSTGRES_USER=ziakhan
+      - POSTGRES_USER=kamil
       - POSTGRES_PASSWORD=my_password
       - POSTGRES_DB=mydatabase
     ports:
@@ -249,6 +261,10 @@ volumes:
     driver_opts:
       type: tmpfs
       device: tmpfs
+  postgres_db:
+    driver: local
+  pgadmin:
+    driver: local
 
 networks:
   default:

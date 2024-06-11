@@ -6,7 +6,12 @@ authors = ["Syed Kamil Zafar <kamilzafar54@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
+fastapi = "^0.111.0"
+uvicorn = "^0.29.0"
+requests = "^2.32.2"
+pydantic = "^2.7.1"
+jsonmerge = "^1.9.2"
 
 
 [build-system]

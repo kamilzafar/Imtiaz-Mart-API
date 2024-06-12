@@ -18,4 +18,4 @@ RUN poetry install
 
 EXPOSE 8008
 
-CMD ["poetry", "run", "uvicorn", "service6.main:app", "--host", "0.0.0.0", "--reload"]
+CMD ["poetry", "run", "uvicorn", "service6.main:app", "--host", "0.0.0.0", "--port","8008", "--reload"]

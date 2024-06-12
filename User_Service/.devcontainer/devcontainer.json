@@ -13,9 +13,9 @@
 			"extensions": [
 				"GitHub.copilot",
 				"GitHub.copilot-chat",
-				"ms-python.vscode-pylance",
 				"ms-python.python",
 				"ms-python.debugpy",
+				"ms-python.vscode-pylance",
 				"zxh404.vscode-proto3"
 			]
 		}

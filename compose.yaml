@@ -126,49 +126,49 @@ services:
     depends_on:
       - postgres_db
   
-  service3:
-    build: 
-      context: ./Order_Service
-      dockerfile: Dockerfile
-    ports:
-      - "8005:8005"
-    volumes:
-      - ./Order_Service:/microservice3/
-    depends_on:
-      - postgres_db
+  # service3:
+  #   build: 
+  #     context: ./Order_Service
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8005:8005"
+  #   volumes:
+  #     - ./Order_Service:/microservice3/
+  #   depends_on:
+  #     - postgres_db
   
-  service4:
-    build: 
-      context: ./Inventory_Service
-      dockerfile: Dockerfile
-    ports:
-      - "8006:8006"
-    volumes:
-      - ./Inventory_Service:/microservice4/
-    depends_on:
-      - postgres_db
+  # service4:
+  #   build: 
+  #     context: ./Inventory_Service
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8006:8006"
+  #   volumes:
+  #     - ./Inventory_Service:/microservice4/
+  #   depends_on:
+  #     - postgres_db
   
-  service5:
-    build: 
-      context: ./Notification_Service
-      dockerfile: Dockerfile
-    ports:
-      - "8007:8007"
-    volumes:
-      - ./Notification_Service:/microservice5/
-    depends_on:
-      - postgres_db
+  # service5:
+  #   build: 
+  #     context: ./Notification_Service
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8007:8007"
+  #   volumes:
+  #     - ./Notification_Service:/microservice5/
+  #   depends_on:
+  #     - postgres_db
   
-  service6:
-    build: 
-      context: ./Payment_Service
-      dockerfile: Dockerfile
-    ports:
-      - "8008:8008"
-    volumes:
-      - ./Payment_Service:/microservice6/
-    depends_on:
-      - postgres_db
+  # service6:
+  #   build: 
+  #     context: ./Payment_Service
+  #     dockerfile: Dockerfile
+  #   ports:
+  #     - "8008:8008"
+  #   volumes:
+  #     - ./Payment_Service:/microservice6/
+  #   depends_on:
+  #     - postgres_db
   
   postgres_db:
     image: postgres:latest # Use the official PostgreSQL image
@@ -227,10 +227,10 @@ services:
       - kong
       - service1
       - service2
-      - service3
-      - service4
-      - service5
-      - service6
+      # - service3
+      # - service4
+      # - service5
+      # - service6
     ports:
       - "9000:9000" # Expose container port 9000 to host port 9000
 

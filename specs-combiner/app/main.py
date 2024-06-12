@@ -20,12 +20,12 @@ logger = logging.getLogger(__name__)
 
 def fetch_openapi_specs():
     services = [
-        {"name": "microservice1", "url": "http://host.docker.internal:8085/openapi.json", "base_route": "/service1"},
-        {"name": "microservice2", "url": "http://host.docker.internal:8086/openapi.json", "base_route": "/service2"},
-        {"name": "microservice3", "url": "http://host.docker.internal:8087/openapi.json", "base_route": "/service3"},
-        {"name": "microservice4", "url": "http://host.docker.internal:8088/openapi.json", "base_route": "/service4"},
-        {"name": "microservice5", "url": "http://host.docker.internal:8089/openapi.json", "base_route": "/service5"},
-        {"name": "microservice6", "url": "http://host.docker.internal:8090/openapi.json", "base_route": "/service6"}
+        {"name": "microservice1", "url": "http://host.docker.internal:8003/openapi.json", "base_route": "/service1"},
+        {"name": "microservice2", "url": "http://host.docker.internal:8004/openapi.json", "base_route": "/service2"},
+        {"name": "microservice3", "url": "http://host.docker.internal:8005/openapi.json", "base_route": "/service3"},
+        {"name": "microservice4", "url": "http://host.docker.internal:8006/openapi.json", "base_route": "/service4"},
+        {"name": "microservice5", "url": "http://host.docker.internal:8007/openapi.json", "base_route": "/service5"},
+        {"name": "microservice6", "url": "http://host.docker.internal:8008/openapi.json", "base_route": "/service6"}
     ]
     specs = []
     for service in services:

@@ -11,7 +11,7 @@ done
 # Register todo
 curl -i -X POST $KONG_ADMIN_URL/services/ \
   --data "name=service1" \
-  --data "url=http://host.docker.internal:8085"
+  --data "url=http://host.docker.internal:8003"
 
 # Register todo-service route
 curl -i -X POST $KONG_ADMIN_URL/services/service1/routes \
@@ -21,7 +21,7 @@ curl -i -X POST $KONG_ADMIN_URL/services/service1/routes \
 # Register service2
 curl -i -X POST $KONG_ADMIN_URL/services/ \
   --data "name=service2" \
-  --data "url=http://host.docker.internal:8086"
+  --data "url=http://host.docker.internal:8004"
 
 # Register service2 route
 curl -i -X POST $KONG_ADMIN_URL/services/service2/routes \
@@ -31,7 +31,7 @@ curl -i -X POST $KONG_ADMIN_URL/services/service2/routes \
 # Register service3
 curl -i -X POST $KONG_ADMIN_URL/services/ \
   --data "name=service3" \
-  --data "url=http://host.docker.internal:8087"
+  --data "url=http://host.docker.internal:8005"
 
 # Register service3 route
 curl -i -X POST $KONG_ADMIN_URL/services/service3/routes \
@@ -41,7 +41,7 @@ curl -i -X POST $KONG_ADMIN_URL/services/service3/routes \
 # Register service4
 curl -i -X POST $KONG_ADMIN_URL/services/ \
   --data "name=service4" \
-  --data "url=http://host.docker.internal:8088"
+  --data "url=http://host.docker.internal:8006"
 
 # Register service4 route
 curl -i -X POST $KONG_ADMIN_URL/services/service4/routes \
@@ -51,7 +51,7 @@ curl -i -X POST $KONG_ADMIN_URL/services/service4/routes \
 # Register service5
 curl -i -X POST $KONG_ADMIN_URL/services/ \
   --data "name=service5" \
-  --data "url=http://host.docker.internal:8089"
+  --data "url=http://host.docker.internal:8007"
 
 # Register service5 route
 curl -i -X POST $KONG_ADMIN_URL/services/service5/routes \
@@ -61,7 +61,7 @@ curl -i -X POST $KONG_ADMIN_URL/services/service5/routes \
 # Register service6
 curl -i -X POST $KONG_ADMIN_URL/services/ \
   --data "name=service6" \
-  --data "url=http://host.docker.internal:8090"
+  --data "url=http://host.docker.internal:8008"
 
 # Register service6 route
 curl -i -X POST $KONG_ADMIN_URL/services/service6/routes \

@@ -220,7 +220,7 @@ services:
       context: ./specs-combiner
       dockerfile: Dockerfile
     volumes:
-      - ./specs-combiner:/code # Sync local development directory with the container
+      - ./specs-combiner:/code/ # Sync local development directory with the container
     depends_on:
       - kong
       - service1

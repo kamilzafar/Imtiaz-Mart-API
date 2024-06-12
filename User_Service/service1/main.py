@@ -1,12 +1,72 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException, status
+from sqlmodel import select, Session
+from typing import List, Annotated, Optional
+from passlib.context import CryptContext
+from datetime import timedelta
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from service1.db import *
+from service1.curd import *
+from service1.services import *
+from service1.models import *
 
-app = FastAPI(docs_url="/docs")
+app = FastAPI(
+    title="User Service", 
+    description="Manages user authentication, registration, and profiles.",
+    version="0.1.0",
+    docs_url="/api/docs", 
+    lifespan=lifespan
+    )
 
-@app.get("/")
+@app.get("/", tags=["Root"])
 def read_root():
     return {"Hello": "World"}
 
-@app.get("/service1")
-def read_service1():
-    return {"service": "service1"}
+@app.post("/api/login", response_model=Token, tags=["Users"])
+async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Annotated[Session, Depends(db_session)]) -> Token:
+    user: Userlogin = get_user_by_username(db, form_data.username)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    if not verify_password(form_data.password, user.password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    refresh_token_expires = timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+    refresh_token = create_access_token(
+        data={"sub": user.username}, expires_delta=refresh_token_expires
+    )
+    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": access_token_expires+refresh_token_expires, "token_type": "bearer"}
 
+@app.post("/api/signup", response_model=User, tags=["Users"])
+async def signup(db: Annotated[Session, Depends(db_session)], user: UserCreate ):
+    try:
+        return signup_user(user, db)
+    except Exception as e:
+        raise HTTPException(status_code=400,detail=str(e))
+
+@app.get("/api/users/me", response_model=User, tags=["Users"])
+async def read_users_me(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(db_session)]) -> User:
+    user = await get_current_user(token, db)
+    return user
+
+@app.patch("/api/user", response_model=User, tags=["Users"])
+def update_user(user: UserUpdate, session: Annotated[Session, Depends(db_session)], current_user: Annotated[User, Depends(get_current_user)]) -> User:
+    updated_user = session.exec(select(User).where(User.id == current_user.id)).first()
+    if not updated_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    update_data = user.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        value = value if key != "password" else pwd_context.hash(value)
+        setattr(updated_user, key, value)
+    session.commit()
+    session.refresh(updated_user)
+    return updated_user

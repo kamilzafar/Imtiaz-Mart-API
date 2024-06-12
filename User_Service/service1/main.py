@@ -18,7 +18,7 @@ app = FastAPI(
 
 @app.get("/", tags=["Root"])
 def read_root():
-    return {"Hello": "World"}
+    return {"Service 1": "User Service"}
 
 @app.post("/api/login", response_model=Token, tags=["Users"])
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Annotated[Session, Depends(db_session)]) -> Token:

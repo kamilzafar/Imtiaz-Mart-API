@@ -9,12 +9,6 @@ from fastapi import HTTPException, status
 from pydantic import EmailStr
 from typing import Union, Any
 
-# SECRET_KEY = str(SECRET_KEY)
-# ALGORITHM = str(ALGORITHM)
-# ACCESS_TOKEN_EXPIRE_MINUTES = ACCESS_TOKEN_EXPIRE_MINUTES
-# REFRESH_TOKEN_EXPIRE_MINUTES = REFRESH_TOKEN_EXPIRE_MINUTES
-# JWT_REFRESH_SECRET_KEY = str(JWT_REFRESH_SECRET_KEY)
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")

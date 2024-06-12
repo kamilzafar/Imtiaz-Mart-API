@@ -1,9 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlmodel import select, Session
-from typing import List, Annotated, Optional
-from passlib.context import CryptContext
+from typing import Annotated
 from datetime import timedelta
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm
 from service1.db import *
 from service1.curd import *
 from service1.services import *

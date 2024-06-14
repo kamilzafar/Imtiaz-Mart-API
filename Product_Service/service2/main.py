@@ -67,7 +67,7 @@ def read_image(image_id: int, session: Annotated[Session, Depends(db_session)]):
     
     return StreamingResponse(io.BytesIO(image.image_data), media_type=image.content_type)
 
-@app.post("/products/", response_model=Product, tags=["Product"])
+@app.post("/products", response_model=Product, tags=["Product"])
 def create_product(product: ProductCreate, session: Annotated[Session, Depends(db_session)]):
     product_image = session.get(Image, product.image_id)
     if not product_image:
@@ -78,7 +78,7 @@ def create_product(product: ProductCreate, session: Annotated[Session, Depends(d
     session.refresh(product)
     return product
 
-@app.get("/products/", response_model=List[Product], tags=["Product"])
+@app.get("/products", response_model=List[Product], tags=["Product"])
 def read_products(session: Annotated[Session, Depends(db_session)], skip: int = 0, limit: int = 10):
     products = session.exec(select(Product).offset(skip).limit(limit)).all()
     return products
@@ -89,3 +89,17 @@ def read_product(product_id: UUID, session: Annotated[Session, Depends(db_sessio
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
+
+@app.delete("/product", tags=["Product"])
+def delete_product(product_id: UUID, session: Annotated[Session, Depends(db_session)]):
+    product = session.get(Product, product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    image = session.exec(select(Image).where(Image.id == product.image_id)).first()
+    if not image:
+        raise HTTPException(status_code=404, detail="Image not found")
+    session.delete(product)
+    session.commit()
+    session.delete(image)
+    session.commit()
+    return {"message": "Product deleted successfully."}

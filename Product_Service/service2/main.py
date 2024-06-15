@@ -90,6 +90,13 @@ def read_product(product_id: UUID, session: Annotated[Session, Depends(db_sessio
         raise HTTPException(status_code=404, detail="Product not found")
     return product
 
+@app.get("/product/{product_name}", response_model=Product, tags=["Product"])
+def get_product_by_name(product_name: str, session: Annotated[Session, Depends(db_session)]):
+    product = session.exec(select(Product).where(Product.name.contains(product_name))).all()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
+
 @app.delete("/product", tags=["Product"])
 def delete_product(product_id: UUID, session: Annotated[Session, Depends(db_session)]):
     product = session.get(Product, product_id)

@@ -19,6 +19,9 @@ from fastapi import FastAPI
 from service2 import settings
 from uuid import UUID, uuid4
 
+
+
+
 @app.get("/", tags=["Root"])
 def read_root():
     return {"Service2": "Product Service"}

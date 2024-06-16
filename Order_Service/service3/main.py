@@ -1,12 +1,10 @@
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
-from typing import Annotated, List
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, Depends, HTTPException
+from typing import Annotated
 from contextlib import asynccontextmanager
 from sqlmodel import SQLModel, create_engine, Session, select
 from fastapi import FastAPI
-from service3.setting import setting
+from service3 import setting
 from service3.service import *
-from uuid import UUID, uuid4
 
 
 connection_string = str(setting.DATABASE_URL)
@@ -30,16 +28,16 @@ def db_session():
         yield session
 
 app = FastAPI(
-    title="Product Service",
-    description="Manages product catalog, including CRUD operations for products.",
+    title="Order Service",
+    description="Handles order creation, updating, and tracking",
     version="0.1",
     lifespan=lifespan,
     docs_url="/docs"
 )
 
 @app.get("/" ,tags=["Root"])
-def get():
-    pass
+def get_root():
+    return {"service":"Order Service"}
 
 @app.get("/orders")
 def get_order(db: Annotated[Session, Depends(db_session)]):

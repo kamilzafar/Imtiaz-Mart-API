@@ -1,6 +1,6 @@
 from sqlmodel import Session,select
 from fastapi import HTTPException
-from models import *
+from service3.models import *
 
 def service_get_order(db:Session):
     order = db.exec(select(Order)).all()

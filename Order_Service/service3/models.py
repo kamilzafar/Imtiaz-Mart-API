@@ -1,3 +1,5 @@
+from typing import Optional
+from uuid import UUID
 from sqlmodel import SQLModel,Field
 from enum import Enum
 
@@ -43,3 +45,11 @@ class OrderItem(OrderItemBase,table =True):
 
 class OrderItemCreate(OrderBase):
     pass
+
+class UserBase(SQLModel):
+    username: str = Field(nullable=False)
+    password: str = Field(nullable=False)
+    email: str = Field(index=True, unique=True, nullable=False)
+    
+class User(UserBase, table=True):
+    id: Optional[UUID] = Field(primary_key=True, index=True)

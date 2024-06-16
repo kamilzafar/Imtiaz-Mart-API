@@ -126,16 +126,16 @@ services:
     depends_on:
       - postgres_db
   
-  # service3:
-  #   build: 
-  #     context: ./Order_Service
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8005:8005"
-  #   volumes:
-  #     - ./Order_Service:/microservice3/
-  #   depends_on:
-  #     - postgres_db
+  service3:
+    build: 
+      context: ./Order_Service
+      dockerfile: Dockerfile
+    ports:
+      - "8005:8005"
+    volumes:
+      - ./Order_Service:/microservice3/
+    depends_on:
+      - postgres_db
   
   # service4:
   #   build: 
@@ -227,7 +227,7 @@ services:
       - kong
       - service1
       - service2
-      # - service3
+      - service3
       # - service4
       # - service5
       # - service6

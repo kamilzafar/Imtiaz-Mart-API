@@ -1,6 +1,14 @@
 from sqlmodel import Session,select
-from fastapi import HTTPException
+from fastapi import HTTPException,Depends
+from fastapi.security import OAuth2PasswordBearer
 from service3.models import *
+from typing import Annotated
+from service3.main import db_session
+from jose import jwt,JWTError
+
+
+oauth_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
+
 
 def service_get_order(db:Session):
     order = db.exec(select(Order)).all()
@@ -76,3 +84,54 @@ def service_order_update(session:Session,user:User,order_id:int):
         service_delete_order_item(session,order_id)
         service_delete_order(session,order_id)
         return {"message":"Order is delivered"}
+    
+def service_get_cart_from_user(session:Session,user:User):
+    carts = session.exec(select(Cart).where(Cart.user_id == user.user_id)).all()
+    return carts
+
+def get_current_user(token:Annotated[str,Depends(oauth_scheme)],session:Session = Depends(db_session)) -> User:
+    """
+    This function is used to get the current user from a token.
+
+    :param token: The token to get the user from.
+    :type token: str
+
+    :return: The current user object, or None if the token is invalid.
+    :rtype: User or None
+    """
+    credentials_exception = HTTPException(status_code=401, detail="Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})                 
+    try:
+        payload = jwt.decode(token,SECRET_KEYY,algorithms=[ALGORITHMM])
+        username = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+
+    except JWTError:
+        raise credentials_exception
+    user = get_user_by_username(session,token_data.username)
+    if user is None:
+        raise credentials_exception
+    return user
+
+
+
+def get_user_by_username(session:Session,username:str) -> User:
+    """
+    This function is used to get a user by username.
+
+    :param session: An instance of the session object used to interact with the database.
+    :type session: Session
+    :param username: The username of the user to retrieve.
+    :type username: str
+
+    :return: The user object corresponding to the provided username, or None if not found.
+    :rtype: User or None
+    """
+    if not username:
+        return None
+    
+    user = session.exec(select(User).where(User.username == username)).one()
+    if user is None:
+        raise HTTPException(status_code=404, detail="user not found!")
+    return user 

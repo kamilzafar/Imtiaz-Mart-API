@@ -2,6 +2,7 @@ from typing import Optional
 from uuid import UUID
 from sqlmodel import SQLModel,Field
 from enum import Enum
+from datetime import timedelta
 
 class Size(str,Enum):
     LARGE:str = "large"
@@ -53,3 +54,33 @@ class UserBase(SQLModel):
     
 class User(UserBase, table=True):
     id: Optional[UUID] = Field(primary_key=True, index=True)
+
+class CartBase(SQLModel):
+    total_cart_products:int
+    product_total:int
+    product_size:Size
+
+class Cart(CartBase,table = True):
+    cart_id:int | None = Field(primary_key=True,default=None)
+    user_id:int | None = Field(foreign_key="user.user_id",default=None)
+    product_id:int | None = Field(foreign_key="product.product_id",default=None) 
+
+class CartCreate(CartBase):
+    pass    
+
+class CartUpdate(CartBase):
+    pass
+
+class CartRead(CartBase):
+    cart_id:int
+    user_id:int
+    product_id:int
+
+class Token(SQLModel):
+    access_token: str
+    refresh_token: str
+    token_type: str
+    expires_in: timedelta
+
+class TokenData(SQLModel):
+    username: str

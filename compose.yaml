@@ -159,16 +159,16 @@ services:
   #   depends_on:
   #     - postgres_db
   
-  # service6:
-  #   build: 
-  #     context: ./Payment_Service
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8008:8008"
-  #   volumes:
-  #     - ./Payment_Service:/microservice6/
-  #   depends_on:
-  #     - postgres_db
+  service6:
+    build: 
+      context: ./Payment_Service
+      dockerfile: Dockerfile
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./Payment_Service:/microservice6/
+    depends_on:
+      - postgres_db
   
   postgres_db:
     image: postgres:latest # Use the official PostgreSQL image
@@ -230,7 +230,7 @@ services:
       - service3
       # - service4
       # - service5
-      # - service6
+      - service6
     ports:
       - "9000:9000" # Expose container port 9000 to host port 9000
 

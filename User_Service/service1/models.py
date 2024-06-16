@@ -1,7 +1,12 @@
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Enum, Column
 from typing import Optional
 from uuid import UUID
 from datetime import timedelta
+import enum
+
+class UserRole(str, enum.Enum):
+    admin = "admin"
+    user = "user"
 
 class Token(SQLModel):
     access_token: str
@@ -25,6 +30,8 @@ class UserUpdate(SQLModel):
 class User(UserBase, table=True):
     id: Optional[UUID] = Field(primary_key=True, index=True)
     email: str = Field(index=True, unique=True, nullable=False)
+    role: UserRole = Field(default=UserRole.user, sa_column=Column("role", Enum(UserRole)))
 
 class UserCreate(UserBase):
     email: str
+    role: UserRole = Field(default=UserRole.user, sa_column=Column("role", Enum(UserRole)))

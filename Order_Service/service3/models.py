@@ -22,7 +22,7 @@ class OrderBase(SQLModel):
 
 class Order(OrderBase,table = True):
     order_id:int | None = Field(primary_key=True,default=None)
-    user_id:int | None = Field(foreign_key="user.user_id",default=None)
+    user_id:int | None = Field(foreign_key="user.id",default=None)
 
 class OrderCreate(OrderBase):
     pass
@@ -41,8 +41,8 @@ class OrderItemBase(SQLModel):
 class OrderItem(OrderItemBase,table =True):
     orderitem_id:int | None = Field(primary_key=True,default=None)
     order_id:int | None = Field(foreign_key="order.order_id",default=None)
-    user_id:int | None = Field(foreign_key="user.user_id",default=None)
-    product_id:int | None = Field(foreign_key="product.product_id",default=None)
+    user_id:int | None = Field(foreign_key="user.id",default=None)
+    product_id:int | None = Field(foreign_key="product.id",default=None)
 
 class OrderItemCreate(OrderBase):
     pass
@@ -62,8 +62,8 @@ class CartBase(SQLModel):
 
 class Cart(CartBase,table = True):
     cart_id:int | None = Field(primary_key=True,default=None)
-    user_id:int | None = Field(foreign_key="user.user_id",default=None)
-    product_id:int | None = Field(foreign_key="product.product_id",default=None) 
+    user_id:int | None = Field(foreign_key="user.id",default=None)
+    product_id:int | None = Field(foreign_key="product.id",default=None) 
 
 class CartCreate(CartBase):
     pass    

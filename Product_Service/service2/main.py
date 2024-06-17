@@ -1,7 +1,7 @@
 import io
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Request, HTTPException
 from typing import Annotated, List
-from fastapi.responses import StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from service2.models import *
 from contextlib import asynccontextmanager
 from sqlmodel import SQLModel, create_engine, Session, select
@@ -18,6 +18,8 @@ from sqlmodel import SQLModel, create_engine, Session, select
 from fastapi import FastAPI
 from service2 import settings
 from uuid import UUID, uuid4
+from fastapi.security import HTTPBearer
+import httpx
 
 connection_string = str(settings.DATABASE_URL)
 
@@ -45,6 +47,23 @@ app = FastAPI(
     version="0.1",
     lifespan=lifespan
 )
+
+auth_scheme = HTTPBearer()
+
+# @app.middleware("http")
+# async def verify_jwt(request: Request, call_next):
+#     token = request.headers.get("Authorization")
+#     if not token:
+#         return JSONResponse(status_code=401, content={"message": "Unauthorized"})
+#     try:
+#         payload = jwt.decode(token, "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7", algorithms=["HS256"])
+#     except jwt.ExpiredSignatureError:
+#         return JSONResponse(status_code=401, content={"message": "Token has expired"})
+#     except jwt.InvalidTokenError:
+#         return JSONResponse(status_code=401, content={"message": "Invalid token"})
+#     response = await call_next(request)
+#     return response
+
 
 @app.get("/", tags=["Root"])
 def read_root():

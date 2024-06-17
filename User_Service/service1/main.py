@@ -12,7 +12,7 @@ app = FastAPI(
     title="User Service", 
     description="Manages user authentication, registration, and profiles.",
     version="0.1.0",
-    docs_url="/api/docs", 
+    docs_url="/docs", 
     lifespan=lifespan
     )
 
@@ -20,7 +20,7 @@ app = FastAPI(
 def read_root():
     return {"Service 1": "User Service"}
 
-@app.post("/api/login", response_model=Token, tags=["Users"])
+@app.post("/login", response_model=Token, tags=["Users"])
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Annotated[Session, Depends(db_session)]) -> Token:
     user: Userlogin = get_user_by_username(db, form_data.username)
     if not user:
@@ -45,19 +45,19 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
     )
     return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": access_token_expires+refresh_token_expires, "token_type": "bearer"}
 
-@app.post("/api/signup", response_model=User, tags=["Users"])
+@app.post("/signup", response_model=User, tags=["Users"])
 async def signup(db: Annotated[Session, Depends(db_session)], user: UserCreate ):
     try:
         return signup_user(user, db)
     except Exception as e:
         raise HTTPException(status_code=400,detail=str(e))
 
-@app.get("/api/users/me", response_model=User, tags=["Users"])
+@app.get("/users/me", response_model=User, tags=["Users"])
 async def read_users_me(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(db_session)]) -> User:
     user = await get_current_user(token, db)
     return user
 
-@app.patch("/api/user", response_model=User, tags=["Users"])
+@app.patch("/user", response_model=User, tags=["Users"])
 def update_user(user: UserUpdate, session: Annotated[Session, Depends(db_session)], current_user: Annotated[User, Depends(get_current_user)]) -> User:
     updated_user = session.exec(select(User).where(User.id == current_user.id)).first()
     if not updated_user:
@@ -69,3 +69,7 @@ def update_user(user: UserUpdate, session: Annotated[Session, Depends(db_session
     session.commit()
     session.refresh(updated_user)
     return updated_user
+
+@app.get("/users", response_model=list[User], tags=["Admin"])
+def read_users(db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]) -> list[User]:
+    return db.exec(select(User)).all()

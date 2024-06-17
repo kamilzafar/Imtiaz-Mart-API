@@ -28,7 +28,7 @@ def signup_user(user: UserCreate, db: Session) -> User:
     
     hashed_password = get_password_hash(user.password)
 
-    new_user = User(id = uuid4(),username=user.username, email=user.email, password=hashed_password)
+    new_user = User(id = uuid4(), username=user.username, email=user.email, password=hashed_password, role=user.role)
 
     db.add(new_user)
     db.commit()
@@ -61,4 +61,16 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: An
     user = get_user_by_username(db, username=token_data.username)
     if user is None:
         raise credentials_exception
+    return user
+
+async def check_admin(user: Annotated[User, Depends(get_current_user)]) -> User:
+    """
+    Check if the user is an admin.
+    Args:
+        user (User): The user object.
+    Returns:
+        User: The user object.
+    """
+    if user.role != 'admin':
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="User not authorized to perform this action")
     return user

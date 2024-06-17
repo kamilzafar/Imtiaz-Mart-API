@@ -64,6 +64,6 @@ def update_order(order_update:OrderUpdate,order_id,session:Annotated[Session, De
         return order 
 
 @app.delete("/deleteorder")
-def delete_order(order_id, user:Annotated[User, Depends(get_current_user)], session:Annotated[Session, Depends(get_session)]):
+def delete_order(order_id, user:Annotated[User, Depends(get_current_user)], session:Annotated[Session, Depends(db_session)]):
     deleted_order = service_delete_order(session,order_id)
     return deleted_order

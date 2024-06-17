@@ -7,8 +7,10 @@ from service3.main import db_session
 from jose import jwt,JWTError
 
 
-oauth_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
 
+oauth_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+ALGORITHM = "HS256"
 
 def service_get_order(db:Session):
     order = db.exec(select(Order)).all()
@@ -28,7 +30,7 @@ def service_get_order_by_id(session:Session, order_id:int) -> Order:
 
 
 def service_create_order_item(session:Session,user:User,order_item_data:Cart,order_id:int):
-    orderitem = OrderItem(order_id=order_id,product_id=order_item_data.product_id,product_size=order_item_data.product_size,product_total=order_item_data.product_total,user_id=user.user_id,total_cart_products=order_item_data.total_cart_products)
+    orderitem = OrderItem(order_id=order_id,product_id=order_item_data.product_id,product_size=order_item_data.product_size,product_total=order_item_data.product_total,user_id=user.id,total_cart_products=order_item_data.total_cart_products)
     session.add(orderitem)
     session.commit()
     session.refresh(orderitem)
@@ -46,14 +48,14 @@ def service_create_order(session:Session, order:Order, user:User) -> Order:
     """
 
     """
-    existing_order = session.exec(select(Order).where(Order.order_id == order.order_id,Order.user_id == user.user_id)).first()
+    existing_order = session.exec(select(Order).where(Order.order_id == order.order_id,Order.user_id == user.id)).first()
     if existing_order:
         raise HTTPException(status_code=404, detail="order is already present!")
-    carts = session.exec(select(Cart).where(Cart.user_id == user.user_id)).all()
+    carts = session.exec(select(Cart).where(Cart.user_id == user.id)).all()
     if not carts:
         raise HTTPException(status_code=404,detail="Cart is Empty!")
     
-    order.user_id = user.user_id
+    order.user_id = user.id
     session.add(order)
     session.commit()
     session.refresh(order)
@@ -86,7 +88,7 @@ def service_order_update(session:Session,user:User,order_id:int):
         return {"message":"Order is delivered"}
     
 def service_get_cart_from_user(session:Session,user:User):
-    carts = session.exec(select(Cart).where(Cart.user_id == user.user_id)).all()
+    carts = session.exec(select(Cart).where(Cart.user_id == user.id)).all()
     return carts
 
 def get_current_user(token:Annotated[str,Depends(oauth_scheme)],session:Session = Depends(db_session)) -> User:
@@ -101,7 +103,7 @@ def get_current_user(token:Annotated[str,Depends(oauth_scheme)],session:Session 
     """
     credentials_exception = HTTPException(status_code=401, detail="Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})                 
     try:
-        payload = jwt.decode(token,SECRET_KEYY,algorithms=[ALGORITHMM])
+        payload = jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])
         username = payload.get("sub")
         if username is None:
             raise credentials_exception

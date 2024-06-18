@@ -1,0 +1,29 @@
+_format_version: "3.0"
+_transform: true
+
+services:
+  - name: user-service
+    url: http://host.docker.internal:8003
+    routes:
+      - name: user-service-route
+        paths:
+          - /user
+  - name: product-service
+    url: http://host.docker.internal:8004
+    routes:
+      - name: product-service-route
+        paths:
+          - /product
+  - name: order-service
+    url: http://host.docker.internal:8005
+    routes:
+      - name: order-service-route
+        paths:
+          - /order
+
+  - name: payment-service
+    url: http://host.docker.internal:8008
+    routes:
+      - name: payment-service-route
+        paths:
+          - /payment

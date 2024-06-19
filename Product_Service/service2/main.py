@@ -45,7 +45,10 @@ app = FastAPI(
     title="Product Service",
     description="Manages product catalog, including CRUD operations for products.",
     version="0.1",
-    lifespan=lifespan
+    lifespan=lifespan,
+    openapi_url="/openapi.json",
+    root_path="/product",
+    docs_url="/docs"
 )
 
 auth_scheme = HTTPBearer()

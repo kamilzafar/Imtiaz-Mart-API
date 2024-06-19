@@ -13,7 +13,9 @@ app = FastAPI(
     description="Manages user authentication, registration, and profiles.",
     version="0.1.0",
     docs_url="/docs", 
-    lifespan=lifespan
+    lifespan=lifespan,
+    openapi_url="/openapi.json",
+    root_path="/user"
     )
 
 @app.get("/", tags=["Root"])

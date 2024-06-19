@@ -8,18 +8,33 @@ services:
       - name: user-service-route
         paths:
           - /user
+        methods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
   - name: product-service
     url: http://host.docker.internal:8004
     routes:
       - name: product-service-route
         paths:
           - /product
+        methods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
   - name: order-service
     url: http://host.docker.internal:8005
     routes:
       - name: order-service-route
         paths:
           - /order
+        methods: 
+          - GET
+          - POST
+          - PATCH
+          - DELETE
 
   - name: payment-service
     url: http://host.docker.internal:8008
@@ -27,3 +42,38 @@ services:
       - name: payment-service-route
         paths:
           - /payment
+        methods: 
+          - GET
+          - POST
+          - PATCH
+          - DELETE
+
+plugins:
+  - name: jwt
+    service: user-service
+    config:
+      claims_to_verify:
+        - exp
+      uri_param_names:
+        - jwt
+  - name: jwt
+    service: product-service
+    config:
+      claims_to_verify:
+        - exp
+  - name: jwt
+    service: order-service
+    config:
+      claims_to_verify:
+        - exp
+  - name: jwt
+    service: payment-service
+    config:
+      claims_to_verify:
+        - exp
+    - name: request-transformer
+      service: user-service
+      config:
+        add:
+          headers:
+            - Authorization:$http_authorization

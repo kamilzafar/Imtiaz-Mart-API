@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Request, HTTPException
 from fastapi.responses import JSONResponse, StreamingResponse
-from fastapi.security import HTTPBearer
+from fastapi.security import HTTPBearer, OAuth2PasswordBearer
 from typing import Annotated, List
 from service2.models import *
 from contextlib import asynccontextmanager
@@ -40,22 +40,26 @@ app = FastAPI(
     docs_url="/docs"
 )
 
-auth_scheme = HTTPBearer()
+auth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-@app.middleware("http")
-async def verify_jwt(request: Request, call_next):
-    if request.url.path not in ["/docs", "/openapi.json", "/products"]:
-        token = request.headers.get("Authorization")
-        if not token:
-            return JSONResponse(status_code=401, content={"message": "Unauthorized"})
-        try:
-            payload = jwt.decode(token, "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7", algorithms=["HS256"])
-        except jwt.ExpiredSignatureError:
-            return JSONResponse(status_code=401, content={"message": "Token has expired"})
-        except jwt.InvalidTokenError:
-            return JSONResponse(status_code=401, content={"message": "Invalid token"})
-    response = await call_next(request)
-    return response
+@app.get("/token", tags=["Auth"])
+async def get_token(token: str = Depends(auth_scheme)):
+    return {"token": token}
+
+# @app.middleware("http")
+# async def verify_jwt(request: Request, call_next):
+#     if request.url.path not in ["/docs", "/openapi.json", "/products"]:
+#         token = request.headers.get("Authorization")
+#         if not token:
+#             return JSONResponse(status_code=401, content={"message": "Unauthorized"})
+#         try:
+#             payload = jwt.decode(token, "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7", algorithms=["HS256"])
+#         except jwt.ExpiredSignatureError:
+#             return JSONResponse(status_code=401, content={"message": "Token has expired"})
+#         except jwt.InvalidTokenError:
+#             return JSONResponse(status_code=401, content={"message": "Invalid token"})
+#     response = await call_next(request)
+#     return response
 
 
 @app.get("/", tags=["Root"])

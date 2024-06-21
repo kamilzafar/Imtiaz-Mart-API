@@ -8,7 +8,6 @@ from service1.db import *
 from service1.services import *
 from service1.models import *
 
-
 app = FastAPI(
     title="User Service", 
     description="Manages user authentication, registration, and profiles.",
@@ -16,7 +15,7 @@ app = FastAPI(
     docs_url="/docs", 
     lifespan=lifespan,
     openapi_url="/openapi.json",
-    root_path="/user"
+    root_path="/auth"
     )
 
 @app.get("/", tags=["Root"])

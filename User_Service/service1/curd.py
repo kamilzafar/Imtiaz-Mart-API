@@ -2,7 +2,7 @@ from uuid import uuid4
 from fastapi import Depends, HTTPException, status
 from sqlmodel import Session, select
 from service1.settings import ALGORITHM, SECRET_KEY
-from typing import List, Annotated
+from typing import Annotated
 from jose import JWTError, jwt
 from service1.db import db_session
 from service1.models import *
@@ -29,6 +29,7 @@ def signup_user(user: UserCreate, db: Session) -> User:
     hashed_password = get_password_hash(user.password)
 
     new_user = User(id = uuid4(), username=user.username, email=user.email, password=hashed_password, role=user.role)
+    add_consumer_to_kong(new_user.username)
 
     db.add(new_user)
     db.commit()

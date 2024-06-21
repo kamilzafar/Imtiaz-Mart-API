@@ -3,10 +3,11 @@ from sqlmodel import select, Session
 from typing import Annotated
 from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
+from service1.curd import signup_user, get_current_user, get_user_by_username, verify_password, check_admin
 from service1.db import *
-from service1.curd import *
 from service1.services import *
 from service1.models import *
+
 
 app = FastAPI(
     title="User Service", 
@@ -71,6 +72,16 @@ def update_user(user: UserUpdate, session: Annotated[Session, Depends(db_session
     session.commit()
     session.refresh(updated_user)
     return updated_user
+
+@app.delete("/user/{username}", response_model=User, tags=["Users"])
+def delete_user(session: Annotated[Session, Depends(db_session)], username: str, current_user: Annotated[User, Depends(check_admin)]) -> User:
+    user = session.exec(select(User).where(User.username == username)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    delete_consumer_from_kong(username)
+    session.delete(user)
+    session.commit()
+    return user
 
 @app.get("/users", response_model=list[User], tags=["Admin"])
 def read_users(db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]) -> list[User]:

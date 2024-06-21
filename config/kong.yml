@@ -4,76 +4,102 @@ _transform: true
 services:
   - name: user-service
     url: http://host.docker.internal:8003
-    routes:
-      - name: user-service-route
-        paths:
-          - /user
-        methods:
-          - GET
-          - POST
-          - PATCH
-          - DELETE
+  
   - name: product-service
     url: http://host.docker.internal:8004
-    routes:
-      - name: product-service-route
-        paths:
-          - /product
-        methods:
-          - GET
-          - POST
-          - PATCH
-          - DELETE
+    
   - name: order-service
     url: http://host.docker.internal:8005
-    routes:
-      - name: order-service-route
-        paths:
-          - /order
-        methods: 
-          - GET
-          - POST
-          - PATCH
-          - DELETE
+
+  - name: inventory-service
+    url: http://host.docker.internal:8006
 
   - name: payment-service
     url: http://host.docker.internal:8008
-    routes:
-      - name: payment-service-route
-        paths:
-          - /payment
-        methods: 
-          - GET
-          - POST
-          - PATCH
-          - DELETE
+
+routes:
+  - name: user-service-route
+    service: user-service
+    paths:
+      - /user
+    methods:
+      - GET
+      - POST
+      - PATCH
+      - DELETE
+
+  - name: product-service-route
+    service: product-service
+    paths:
+      - /product
+    methods:
+      - GET
+      - POST
+      - PATCH
+      - DELETE
+
+  - name: order-service-route
+    service: order-service
+    paths:
+      - /order
+    methods: 
+      - GET
+      - POST
+      - PATCH
+      - DELETE
+
+  - name: inventory-service-route
+    service: inventory-service
+    paths:
+      - /inventory
+    methods: 
+      - GET
+      - POST
+      - PATCH
+      - DELETE
+
+  - name: payment-service-route
+    service: payment-service
+    paths:
+      - /payment
+    methods: 
+      - GET
+      - POST
+      - PATCH
+      - DELETE
+
+consumers:
+  - username: kamil
+    custom_id: "12345"
 
 plugins:
-  - name: jwt
-    service: user-service
-    config:
-      claims_to_verify:
-        - exp
-      uri_param_names:
-        - jwt
+  # - name: jwt
+  #   service: user-service
+  #   enabled: true
+  #   config:
+  #     claims_to_verify:
+  #       - exp
   - name: jwt
     service: product-service
     config:
+      header_names:
+        - Authorization
+      secret_is_base64: false
       claims_to_verify:
         - exp
-  - name: jwt
-    service: order-service
+#   - name: jwt
+#     service: order-service
+#     config:
+#       claims_to_verify:
+#         - exp
+#   - name: jwt
+#     service: payment-service
+#     config:
+#       claims_to_verify:
+#         - exp
+  - name: request-transformer
+    service: user-service
     config:
-      claims_to_verify:
-        - exp
-  - name: jwt
-    service: payment-service
-    config:
-      claims_to_verify:
-        - exp
-    - name: request-transformer
-      service: user-service
-      config:
-        add:
-          headers:
-            - Authorization:$http_authorization
+      add:
+        headers:
+          - Authorization:$http_authorization

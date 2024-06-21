@@ -73,7 +73,7 @@ def update_user(user: UserUpdate, session: Annotated[Session, Depends(db_session
     session.refresh(updated_user)
     return updated_user
 
-@app.delete("/user/{username}", response_model=User, tags=["Users"])
+@app.delete("/user/{username}", response_model=User, tags=["Admin"])
 def delete_user(session: Annotated[Session, Depends(db_session)], username: str, current_user: Annotated[User, Depends(check_admin)]) -> User:
     user = session.exec(select(User).where(User.username == username)).first()
     if not user:
@@ -81,7 +81,7 @@ def delete_user(session: Annotated[Session, Depends(db_session)], username: str,
     delete_consumer_from_kong(username)
     session.delete(user)
     session.commit()
-    return user
+    return {username: "deleted"}
 
 @app.get("/users", response_model=list[User], tags=["Admin"])
 def read_users(db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]) -> list[User]:

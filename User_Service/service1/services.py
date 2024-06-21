@@ -204,4 +204,4 @@ def delete_consumer_from_kong(username: str):
     if response.status_code != 204:
         raise HTTPException(status_code=500, detail="Failed to delete consumer from Kong")
 
-    return response.json()
+    return {"message": "Consumer deleted successfully"}

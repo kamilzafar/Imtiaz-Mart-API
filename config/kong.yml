@@ -65,6 +65,20 @@ services:
         # plugins:
         #   - name: jwt
 
+  - name: notification-service
+    url: http://host.docker.internal:8007
+    routes:
+      - name: notification-service-route
+        paths:
+          - /notification
+        methods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
+        # plugins:
+        #   - name: jwt
+
   - name: payment-service
     url: http://host.docker.internal:8008
     routes:

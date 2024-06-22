@@ -1,54 +1,21 @@
-from fastapi import FastAPI
-from pydantic import BaseModel
-from confluent_kafka import Producer, Consumer, KafkaError
-import asyncio
+from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 
-app = FastAPI()
+app = FastAPI(
+    title="Payment Service",
+    description="Processes payments and manages transaction records.",
+    version="0.1",
+    docs_url="/docs",
+    openapi_url="/openapi.json",
+    root_path="/payment"
+)
 
-# Kafka Producer Configuration
-producer_conf = {'bootstrap.servers': 'broker:9092'}
-producer = Producer(producer_conf)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-# Kafka Consumer Configuration
-consumer_conf = {
-    'bootstrap.servers': 'broker:9092',
-    'group.id': 'my-group',
-    'auto.offset.reset': 'earliest'
-}
-consumer = Consumer(consumer_conf)
-consumer.subscribe(['my_topic'])
-
-class Item(BaseModel):
-    name: str
-    value: str
-
-@app.get("/")
+@app.get("/", tags=["Root"])
 def get_root():
     return {"service6": "Payment Service"}
 
-@app.post("/produce/")
-async def produce_message(item: Item):
-    producer.produce('my_topic', key=item.name, value=item.value)
-    producer.flush()
-    return {"status": "message produced"}
-
-@app.get("/consume/")
-async def consume_message():
-    messages = []
-    while True:
-        msg = consumer.poll(timeout=1.0)
-        if msg is None:
-            break
-        if msg.error():
-            if msg.error().code() != KafkaError._PARTITION_EOF:
-                return {"error": msg.error()}
-            continue
-        messages.append({
-            "key": msg.key().decode('utf-8'),
-            "value": msg.value().decode('utf-8')
-        })
-    return {"messages": messages}
-
-@app.on_event("shutdown")
-def shutdown_event():
-    consumer.close()
+@app.get("/process", tags=["Payment"])
+def process_payment(token: str = Depends(oauth2_scheme)):
+    return {"message": "Payment processed successfully"}

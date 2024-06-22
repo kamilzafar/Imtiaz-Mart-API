@@ -1,76 +1,29 @@
-import io
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Request, HTTPException
-from typing import Annotated, List
-from fastapi.responses import JSONResponse, StreamingResponse
-from service2.models import *
-from contextlib import asynccontextmanager
-from sqlmodel import SQLModel, create_engine, Session, select
-from fastapi import FastAPI
-from service2 import settings
-from uuid import UUID, uuid4
-import io
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File
-from typing import Annotated, List
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, HTTPException
 from fastapi.responses import StreamingResponse
-from service2.models import *
-from contextlib import asynccontextmanager
-from sqlmodel import SQLModel, create_engine, Session, select
-from fastapi import FastAPI
-from service2 import settings
+from typing import Annotated, List
+from service2.services import get_current_user, check_admin
+from service2.models import User, Product, ProductCreate, Image
+from sqlmodel import Session, select
 from uuid import UUID, uuid4
-from fastapi.security import HTTPBearer
-import httpx
-
-connection_string = str(settings.DATABASE_URL)
-
-engine = create_engine(
-    connection_string, connect_args={}, pool_recycle=300
-)
-
-# Create the tables
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Creating database connection")
-    create_db_and_tables()
-    yield
-
-def db_session():
-    with Session(engine) as session:
-        yield session
+import io
+from service2.db import db_session, lifespan
 
 app = FastAPI(
     title="Product Service",
     description="Manages product catalog, including CRUD operations for products.",
     version="0.1",
-    lifespan=lifespan
+    lifespan=lifespan,
+    openapi_url="/openapi.json",
+    root_path="/product",
+    docs_url="/docs"
 )
-
-auth_scheme = HTTPBearer()
-
-# @app.middleware("http")
-# async def verify_jwt(request: Request, call_next):
-#     token = request.headers.get("Authorization")
-#     if not token:
-#         return JSONResponse(status_code=401, content={"message": "Unauthorized"})
-#     try:
-#         payload = jwt.decode(token, "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7", algorithms=["HS256"])
-#     except jwt.ExpiredSignatureError:
-#         return JSONResponse(status_code=401, content={"message": "Token has expired"})
-#     except jwt.InvalidTokenError:
-#         return JSONResponse(status_code=401, content={"message": "Invalid token"})
-#     response = await call_next(request)
-#     return response
-
 
 @app.get("/", tags=["Root"])
 def read_root():
     return {"Service2": "Product Service"}
 
 @app.post("/upload-file", tags=["Image"])
-async def get_file(file: Annotated[UploadFile, File(title="Product Image")], session: Annotated[Session, Depends(db_session)]):
+async def get_file(file: Annotated[UploadFile, File(title="Product Image")], session: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
     if file.content_type.startswith("image/"):
         try:
             image_data = await file.read()
@@ -96,8 +49,8 @@ def read_image(image_id: int, session: Annotated[Session, Depends(db_session)]):
     
     return StreamingResponse(io.BytesIO(image.image_data), media_type=image.content_type)
 
-@app.post("/products", response_model=Product, tags=["Product"])
-def create_product(product: ProductCreate, session: Annotated[Session, Depends(db_session)]):
+@app.post("/product", response_model=Product, tags=["Product"])
+def create_product(product: ProductCreate, session: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
     product_image = session.get(Image, product.image_id)
     if not product_image:
         raise HTTPException(status_code=400, detail="Image not found")
@@ -119,15 +72,15 @@ def read_product(product_id: UUID, session: Annotated[Session, Depends(db_sessio
         raise HTTPException(status_code=404, detail="Product not found")
     return product
 
-@app.get("/product/{product_name}", response_model=Product, tags=["Product"])
+@app.get("/products/{product_name}", response_model=Product, tags=["Product"])
 def get_product_by_name(product_name: str, session: Annotated[Session, Depends(db_session)]):
     product = session.exec(select(Product).where(Product.name.contains(product_name))).all()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
 
-@app.delete("/product", tags=["Product"])
-def delete_product(product_id: UUID, session: Annotated[Session, Depends(db_session)]):
+@app.delete("/product/{product_id}", tags=["Product"])
+def delete_product(product_id: UUID, session: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
     product = session.get(Product, product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -139,3 +92,8 @@ def delete_product(product_id: UUID, session: Annotated[Session, Depends(db_sess
     session.delete(image)
     session.commit()
     return {"message": "Product deleted successfully."}
+
+@app.get("/token", tags=["Auth"])
+async def get_user(token: Annotated[User, Depends(get_current_user)], db: Annotated[Session, Depends(db_session)]):
+    # user = await get_current_user(token, db)
+    return token

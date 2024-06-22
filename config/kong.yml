@@ -7,19 +7,77 @@ services:
     routes:
       - name: user-service-route
         paths:
-          - /user
+          - /auth
+        methods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
+        # plugins:
+        #   - name: jwt
+        #     config:
+        #       claims_to_verify:
+        #         - exp
+        #       key_claim_name: iss
+        #       secret_is_base64: false
+        #       uri_param_names:
+        #         - jwt
+  
   - name: product-service
     url: http://host.docker.internal:8004
     routes:
       - name: product-service-route
         paths:
           - /product
+        methods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
+        # plugins:
+        #   - name: jwt
+    
   - name: order-service
     url: http://host.docker.internal:8005
     routes:
       - name: order-service-route
         paths:
           - /order
+        methods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
+        # plugins:
+        #   - name: jwt
+
+  - name: inventory-service
+    url: http://host.docker.internal:8006
+    routes:
+      - name: inventory-service-route
+        paths:
+          - /inventory
+        methods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
+        # plugins:
+        #   - name: jwt
+
+  - name: notification-service
+    url: http://host.docker.internal:8007
+    routes:
+      - name: notification-service-route
+        paths:
+          - /notification
+        methods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
+        # plugins:
+        #   - name: jwt
 
   - name: payment-service
     url: http://host.docker.internal:8008
@@ -27,3 +85,10 @@ services:
       - name: payment-service-route
         paths:
           - /payment
+        methods:
+          - GET
+          - POST
+          - PATCH
+          - DELETE
+        # plugins:
+        #   - name: jwt

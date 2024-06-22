@@ -1,41 +1,31 @@
-from uuid import uuid4
-from fastapi import Depends, HTTPException, status
-from sqlmodel import Session, select
-from service1.settings import ALGORITHM, SECRET_KEY
 from typing import Annotated
+from fastapi import Depends, HTTPException, status
+from service2.settings import SECRET_KEY, ALGORITHM
+from service2.models import User, TokenData
+from service2.db import db_session
 from jose import JWTError, jwt
-from service1.db import db_session
-from service1.models import *
-from service1.services import *
+from sqlmodel import Session, select
+from fastapi.security import OAuth2PasswordBearer
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-def signup_user(user: UserCreate, db: Session) -> User:
+def get_user_by_username(db:Session,username:str) -> User:
     """
-    Create a new user.
+    Get the user by username.
     Args:
-        user (UserCreate): The user data.
         db (Session): The database session.
+        username (str): The username of the user.
     Returns:
         User: The user object.
-    """
-    search_user_by_email = db.exec(select(User).where(User.email == user.email)).first()
-    if search_user_by_email:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Email id already registered")
-    
-    search_user_by_username = db.exec(select(User).where(User.username == user.username)).first()
-    if search_user_by_username:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Try Different username")
-    
-    hashed_password = get_password_hash(user.password)
+        """
+    if username is None:
+        raise  HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,headers={"WWW-Authenticate": 'Bearer'},detail={"error": "invalid_token", "error_description": "The access token expired"})
 
-    new_user = User(id = uuid4(), username=user.username, email=user.email, password=hashed_password, role=user.role)
-    add_consumer_to_kong(new_user.username)
+    user = db.exec(select(User).where(User.username == username)).first()
 
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-
-    return new_user
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="User not found")
+    return user
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(db_session)]) -> User:
     """

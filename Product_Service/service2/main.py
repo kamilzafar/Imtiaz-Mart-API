@@ -1,34 +1,12 @@
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Request, HTTPException
-from fastapi.responses import JSONResponse, StreamingResponse
-from fastapi.security import HTTPBearer, OAuth2PasswordBearer
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, HTTPException
+from fastapi.responses import StreamingResponse
 from typing import Annotated, List
+from service2.services import get_current_user, oauth2_scheme
 from service2.models import *
-from contextlib import asynccontextmanager
-from sqlmodel import SQLModel, create_engine, Session, select
-from fastapi import FastAPI
-from service2 import settings
+from sqlmodel import Session, select
 from uuid import UUID, uuid4
 import io
-
-connection_string = str(settings.DATABASE_URL)
-
-engine = create_engine(
-    connection_string, connect_args={}, pool_recycle=300
-)
-
-# Create the tables
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Creating database connection")
-    create_db_and_tables()
-    yield
-
-def db_session():
-    with Session(engine) as session:
-        yield session
+from service2.db import db_session, lifespan
 
 app = FastAPI(
     title="Product Service",
@@ -39,28 +17,6 @@ app = FastAPI(
     root_path="/product",
     docs_url="/docs"
 )
-
-auth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-
-@app.get("/token", tags=["Auth"])
-async def get_token(token: str = Depends(auth_scheme)):
-    return {"token": token}
-
-# @app.middleware("http")
-# async def verify_jwt(request: Request, call_next):
-#     if request.url.path not in ["/docs", "/openapi.json", "/products"]:
-#         token = request.headers.get("Authorization")
-#         if not token:
-#             return JSONResponse(status_code=401, content={"message": "Unauthorized"})
-#         try:
-#             payload = jwt.decode(token, "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7", algorithms=["HS256"])
-#         except jwt.ExpiredSignatureError:
-#             return JSONResponse(status_code=401, content={"message": "Token has expired"})
-#         except jwt.InvalidTokenError:
-#             return JSONResponse(status_code=401, content={"message": "Invalid token"})
-#     response = await call_next(request)
-#     return response
-
 
 @app.get("/", tags=["Root"])
 def read_root():
@@ -136,3 +92,8 @@ def delete_product(product_id: UUID, session: Annotated[Session, Depends(db_sess
     session.delete(image)
     session.commit()
     return {"message": "Product deleted successfully."}
+
+@app.get("/token", tags=["Auth"])
+async def get_user(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(db_session)]):
+    user = await get_current_user(token, db)
+    return user

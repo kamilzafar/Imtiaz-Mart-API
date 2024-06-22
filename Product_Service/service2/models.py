@@ -48,3 +48,6 @@ class ProductCreate(ProductBase):
 
 class ProductUpdate(ProductBase):
     pass
+
+class TokenData(SQLModel):
+    username: str

@@ -7,7 +7,7 @@ services:
     routes:
       - name: user-service-route
         paths:
-          - /user
+          - /auth
         methods:
           - GET
           - POST

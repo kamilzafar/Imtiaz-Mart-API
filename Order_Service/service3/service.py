@@ -1,30 +1,22 @@
+from jose import jwt, JWTError
 from sqlmodel import Session,select
 from fastapi import HTTPException,Depends
 from fastapi.security import OAuth2PasswordBearer
 from service3.models import *
 from typing import Annotated
-from sqlmodel import create_engine
-from service3.setting import *
+from service3 import setting
+from service3.db import db_session
 
-from jose import jwt,JWTError
-
-connection_string = str(DATABASE_URL)
-
-
-engine = create_engine(
-    connection_string, connect_args={}, pool_recycle=300
-)
-
-def db_session():
-    with Session(engine) as session:
-        yield session
-
-
-oauth_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
-SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
-ALGORITHM = "HS256"
+oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 def service_get_order(db:Session):
+    """
+    This function is used to get all orders.
+    Args:
+        db (Session): The database session.
+    Returns:
+        List[Order]: The list of orders.
+    """
     order = db.exec(select(Order)).all()
     if order is None:
         raise HTTPException(status_code=404, detail="order not found!")
@@ -33,7 +25,12 @@ def service_get_order(db:Session):
 
 def service_get_order_by_id(session:Session, order_id:int) -> Order:
     """
-
+    This function is used to get a order by its id.
+    Args:
+        session (Session): The database session.
+        order_id (int): The id of the order to retrieve.
+    Returns:
+        Order: The order object.
     """
     order = session.exec(select(Order).where(Order.order_id == order_id)).first()
     if order is None:
@@ -58,7 +55,13 @@ def service_delete_order_item(session:Session,order_id:int):
 
 def service_create_order(session:Session, order:Order, user:User) -> Order:
     """
-
+    This function is used to create a new order.
+    Args:
+        session (Session): The database session.
+        order (Order): The order data.
+        user (User): The user object.
+    Returns:
+        Order: The order object.
     """
     existing_order = session.exec(select(Order).where(Order.order_id == order.order_id,Order.user_id == user.id)).first()
     if existing_order:
@@ -83,12 +86,28 @@ def service_create_order(session:Session, order:Order, user:User) -> Order:
 
 
 def service_delete_order(session:Session, order_id:int):
+    """
+    This function is used to delete an order by its id.
+    Args:
+        session (Session): The database session.
+        order_id (int): The id of the order to delete.
+    Returns:
+        dict: The response message.
+    """
     order = service_get_order_by_id(session, order_id)  
     session.delete(order)
     session.commit()
     return {"message":"order deleted"}
 
 def service_order_update(session:Session,user:User,order_id:int):
+    """
+    This function is used to update an order.
+    Args:
+        session (Session): The database session.
+        order_id (int): The id of the order to update.
+    Returns:
+        simplejson: The response message.
+    """
     order = service_get_order_by_id(session,order_id)
     if order.order_status == "cancelled":
         service_delete_order_item(session,order_id)
@@ -105,17 +124,16 @@ def service_get_cart_from_user(session:Session,user:User):
 
 def get_current_user(token:Annotated[str,Depends(oauth_scheme)],session:Session = Depends(db_session)) -> User:
     """
-    This function is used to get the current user from a token.
-
-    :param token: The token to get the user from.
-    :type token: str
-
-    :return: The current user object, or None if the token is invalid.
-    :rtype: User or None
+    This function is used to get the current user from the token.
+    Args:
+        token (str): The access token.
+        db (Session): The database session.
+    Returns:
+        User: The user object.
     """
     credentials_exception = HTTPException(status_code=401, detail="Could not validate credentials", headers={"WWW-Authenticate": "Bearer"})                 
     try:
-        payload = jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])
+        payload = jwt.decode(token, setting.SECRET_KEY,algorithms=[setting.ALGORITHM])
         username = payload.get("sub")
         if username is None:
             raise credentials_exception
@@ -132,15 +150,12 @@ def get_current_user(token:Annotated[str,Depends(oauth_scheme)],session:Session 
 
 def get_user_by_username(session:Session,username:str) -> User:
     """
-    This function is used to get a user by username.
-
-    :param session: An instance of the session object used to interact with the database.
-    :type session: Session
-    :param username: The username of the user to retrieve.
-    :type username: str
-
-    :return: The user object corresponding to the provided username, or None if not found.
-    :rtype: User or None
+    This function is used to get a user by its username.
+    Args:
+        session (Session): The database session.
+        username (str): The username of the user to retrieve.
+    Returns:
+        User: The user object.
     """
     if not username:
         return None

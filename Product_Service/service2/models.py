@@ -37,11 +37,11 @@ class ProductBase(SQLModel):
     image_id: int = Field(foreign_key="image.id")
 
 class Product(ProductBase, table=True):
-    id: Optional[UUID] = Field(default=None, primary_key=True, index=True)
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
     user_id: UUID = Field(foreign_key="user.id")
 
 class ProductRead(ProductBase):
-    id: UUID
+    id: int
 
 class ProductCreate(ProductBase):
     pass

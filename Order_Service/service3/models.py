@@ -1,6 +1,6 @@
 from typing import Optional
 from uuid import UUID
-from sqlmodel import SQLModel,Field
+from sqlmodel import SQLModel,Field,Column
 from enum import Enum
 from datetime import timedelta
 
@@ -22,7 +22,7 @@ class OrderBase(SQLModel):
 
 class Order(OrderBase,table = True):
     order_id:int | None = Field(primary_key=True,default=None)
-    user_id:int | None = Field(foreign_key="user.id",default=None)
+    user_id:UUID | None = Field(foreign_key="user.id",default=None)
 
 class OrderCreate(OrderBase):
     pass
@@ -41,7 +41,7 @@ class OrderItemBase(SQLModel):
 class OrderItem(OrderItemBase,table =True):
     orderitem_id:int | None = Field(primary_key=True,default=None)
     order_id:int | None = Field(foreign_key="order.order_id",default=None)
-    user_id:int | None = Field(foreign_key="user.id",default=None)
+    user_id:UUID | None = Field(foreign_key="user.id",default=None)
     product_id:int | None = Field(foreign_key="product.id",default=None)
 
 class OrderItemCreate(OrderBase):
@@ -62,7 +62,7 @@ class CartBase(SQLModel):
 
 class Cart(CartBase,table = True):
     cart_id:int | None = Field(primary_key=True,default=None)
-    user_id:int | None = Field(foreign_key="user.id",default=None)
+    user_id:UUID | None = Field(foreign_key="user.id",default=None)
     product_id:int | None = Field(foreign_key="product.id",default=None) 
 
 class CartCreate(CartBase):
@@ -73,7 +73,7 @@ class CartUpdate(CartBase):
 
 class CartRead(CartBase):
     cart_id:int
-    user_id:int
+    user_id:UUID
     product_id:int
 
 class Token(SQLModel):
@@ -84,3 +84,37 @@ class Token(SQLModel):
 
 class TokenData(SQLModel):
     username: str
+
+
+class Image(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    filename: str
+    content_type: str
+    image_data: bytes
+
+class Category(str, Enum):
+    electronics = "electronics"
+    clothing = "clothing"
+    food = "food"
+    furniture = "furniture"
+    
+class ProductBase(SQLModel):
+    name: str
+    description: str
+    price: int
+    stock: int
+    category: Category
+    image_id: int = Field(foreign_key="image.id")
+
+class Product(ProductBase, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    user_id: UUID | None = Field(foreign_key="user.id")
+
+class ProductRead(ProductBase):
+    id: int
+
+class ProductCreate(ProductBase):
+    pass
+
+class ProductUpdate(ProductBase):
+    pass

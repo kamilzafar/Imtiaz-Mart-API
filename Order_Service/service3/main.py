@@ -1,13 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException
-from typing import Annotated
 from contextlib import asynccontextmanager
 from sqlmodel import SQLModel, create_engine, Session, select
 from fastapi import FastAPI
-from service3 import setting
+from service3.setting import *
 from service3.service import *
 
 
-connection_string = str(setting.DATABASE_URL)
+connection_string = str(DATABASE_URL)
 
 engine = create_engine(
     connection_string, connect_args={}, pool_recycle=300
@@ -67,3 +66,4 @@ def update_order(order_update:OrderUpdate,order_id,session:Annotated[Session, De
 def delete_order(order_id, user:Annotated[User, Depends(get_current_user)], session:Annotated[Session, Depends(db_session)]):
     deleted_order = service_delete_order(session,order_id)
     return deleted_order
+

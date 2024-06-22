@@ -3,9 +3,21 @@ from fastapi import HTTPException,Depends
 from fastapi.security import OAuth2PasswordBearer
 from service3.models import *
 from typing import Annotated
-from service3.main import db_session
+from sqlmodel import create_engine
+from service3.setting import *
+
 from jose import jwt,JWTError
 
+connection_string = str(DATABASE_URL)
+
+
+engine = create_engine(
+    connection_string, connect_args={}, pool_recycle=300
+)
+
+def db_session():
+    with Session(engine) as session:
+        yield session
 
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")

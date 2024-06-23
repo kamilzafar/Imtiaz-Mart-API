@@ -1,30 +1,16 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends
 from contextlib import asynccontextmanager
-from sqlmodel import SQLModel, create_engine, Session, select
+from sqlmodel import Session
 from fastapi import FastAPI
-from service3.setting import *
 from service3.service import *
-
-
-connection_string = str(DATABASE_URL)
-
-engine = create_engine(
-    connection_string, connect_args={}, pool_recycle=300
-)
-
-# Create the tables
-def create_db_and_tables():
-    SQLModel.metadata.create_all(engine)
+from service3.db import create_db_and_tables, db_session
+from typing import Annotated
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Creating database connection")
     create_db_and_tables()
     yield
-
-def db_session():
-    with Session(engine) as session:
-        yield session
 
 app = FastAPI(
     title="Order Service",
@@ -40,18 +26,18 @@ app = FastAPI(
 def get_root():
     return {"service":"Order Service"}
 
-@app.get("/orders")
+@app.get("/orders", tags=["Order"])
 def get_order(db: Annotated[Session, Depends(db_session)]):
     pass
 
-@app.post("/createorder")
+@app.post("/createorder", response_model=Order, tags=["Order"])
 def create_order(order_data:OrderCreate,session:Annotated[Session, Depends(db_session)],user = Depends(get_current_user)) -> OrderRead:
     
     order_info = Order.model_validate(order_data)
     order = service_create_order(session, order_info,user)
     return order
 
-@app.patch("/updateorder")
+@app.patch("/updateorder", response_model=Order, tags=["Order"])
 def update_order(order_update:OrderUpdate,order_id,session:Annotated[Session, Depends(db_session)], user = Depends(get_current_user)):
     order = service_get_order_by_id(session,order_id)
     if order:
@@ -64,7 +50,7 @@ def update_order(order_update:OrderUpdate,order_id,session:Annotated[Session, De
             return service_order_update(session,user,order_id)
         return order 
 
-@app.delete("/deleteorder")
+@app.delete("/deleteorder", tags=["Order"])
 def delete_order(order_id, user:Annotated[User, Depends(get_current_user)], session:Annotated[Session, Depends(db_session)]):
     deleted_order = service_delete_order(session,order_id)
     return deleted_order

@@ -167,7 +167,7 @@ def get_user_by_username(session:Session,username:str) -> User:
 
 
 def service_add_same_product_to_cart(session:Session,user:User,cart_updated_data:Cart):
-    cart_row = session.exec(select(Cart).where(Cart.user_id == user.user_id,Cart.product_id == cart_updated_data.product_id,Cart.product_size == cart_updated_data.product_size)).first()
+    cart_row = session.exec(select(Cart).where(Cart.user_id == user.id,Cart.product_id == cart_updated_data.product_id,Cart.product_size == cart_updated_data.product_size)).first()
     product:Product = session.exec(select(Product).where(Product.product_id == cart_updated_data.product_id)).first() 
     if cart_row:
         cart_row.total_cart_products += cart_updated_data.total_cart_products 
@@ -181,9 +181,9 @@ def service_add_to_cart(session:Session,cart_data:Cart,user:User,product_id:int)
     if not user:
         raise HTTPException(status_code=401,detail="User not found!")
     
-    cart_data.user_id = user.user_id
+    cart_data.user_id = user.id
     cart_data.product_id = product_id
-    cart = session.exec(select(Cart).where(Cart.user_id == user.user_id,Cart.product_id == product_id, Cart.product_size == cart_data.product_size)).first()
+    cart = session.exec(select(Cart).where(Cart.user_id == user.id,Cart.product_id == product_id, Cart.product_size == cart_data.product_size)).first()
     if cart:
         return service_add_same_product_to_cart(session,user,cart_data)
     session.add(cart_data)
@@ -194,5 +194,5 @@ def service_add_to_cart(session:Session,cart_data:Cart,user:User,product_id:int)
     return cart_data
 
 def service_get_product_from_cart(session:Session,user:User):
-    product_from_cart = session.exec(select(Product).join(Cart).where(Cart.user_id == user.user_id))
+    product_from_cart = session.exec(select(Product).join(Cart).where(Cart.user_id == user.id))
     return product_from_cart

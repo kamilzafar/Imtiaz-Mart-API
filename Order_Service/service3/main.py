@@ -55,12 +55,12 @@ def delete_order(order_id, user:Annotated[User, Depends(get_current_user)], sess
     deleted_order = service_delete_order(session,order_id)
     return deleted_order
 
-@app.post("/addtocart",response_model=CartRead)
+@app.post("/addtocart", response_model=CartRead, tags=["Cart"])
 def add_to_cart(product_id:int,cart_info:CartCreate,session:Annotated[Session,Depends(db_session)],user:Annotated[User, Depends(get_current_user)]):
     cart_data = Cart.model_validate(cart_info)
     cart = service_add_to_cart(session,cart_data,user,product_id)
     return cart
 
-@app.get("/getproductfromcart",response_model=list[ProductRead])
+@app.get("/getproductfromcart", response_model=list[ProductRead], tags=["Cart"])
 def get_product_from_cart(session:Annotated[Session,Depends(db_session)],user:Annotated[User, Depends(get_current_user)]):
     return service_get_product_from_cart(session,user)

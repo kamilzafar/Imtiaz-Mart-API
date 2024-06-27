@@ -26,11 +26,12 @@ app = FastAPI(
 def get_root():
     return {"service":"Order Service"}
 
-@app.get("/orders", tags=["Order"])
-def get_order(db: Annotated[Session, Depends(db_session)]):
-    pass
+@app.get("/getorders", tags=["Order"] ,response_model=Order)
+def get_order(db: Annotated[Session, Depends(db_session)],user = Depends(get_current_user)):
+    order = service_get_order(db,user)
+    return order
 
-@app.post("/createorder", response_model=Order, tags=["Order"])
+@app.post("/createorder", response_model=OrderRead, tags=["Order"])
 def create_order(order_data:OrderCreate,session:Annotated[Session, Depends(db_session)],user = Depends(get_current_user)) -> OrderRead:
     
     order_info = Order.model_validate(order_data)

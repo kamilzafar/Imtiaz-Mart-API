@@ -49,16 +49,17 @@ def read_image(image_id: int, session: Annotated[Session, Depends(db_session)]):
     
     return StreamingResponse(io.BytesIO(image.image_data), media_type=image.content_type)
 
-@app.post("/product", response_model=Product, tags=["Product"])
+@app.post("/createproduct", response_model=Product, tags=["Product"])
 def create_product(product: ProductCreate, session: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
     product_image = session.get(Image, product.image_id)
     if not product_image:
         raise HTTPException(status_code=400, detail="Image not found")
-    product = Product(**product.dict(), id=uuid4())
-    session.add(product)
-    session.commit()
-    session.refresh(product)
-    return product
+    if user:
+        product = Product(**product.model_dump(),user_id=user.id)
+        session.add(product)
+        session.commit()
+        session.refresh(product)
+        return product
 
 @app.get("/products", response_model=List[Product], tags=["Product"])
 def read_products(session: Annotated[Session, Depends(db_session)], skip: int = 0, limit: int = 10):

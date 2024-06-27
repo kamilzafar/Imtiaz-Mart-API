@@ -9,7 +9,9 @@ from service3.db import db_session
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-def service_get_order(db:Session):
+
+
+def service_get_order(db:Session,user:User):
     """
     This function is used to get all orders.
     Args:
@@ -17,10 +19,12 @@ def service_get_order(db:Session):
     Returns:
         List[Order]: The list of orders.
     """
-    order = db.exec(select(Order)).all()
-    if order is None:
+    orders = db.exec(select(Order).where(Order.user_id == user.id)).all()
+
+    if orders is None:
         raise HTTPException(status_code=404, detail="order not found!")
-    return order
+    for order in orders:
+        return order
 
 
 def service_get_order_by_id(session:Session, order_id:int) -> Order:

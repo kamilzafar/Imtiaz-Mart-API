@@ -49,7 +49,7 @@ def read_image(image_id: int, session: Annotated[Session, Depends(db_session)]):
     
     return StreamingResponse(io.BytesIO(image.image_data), media_type=image.content_type)
 
-@app.post("/createproduct", response_model=Product, tags=["Product"])
+@app.post("/create", response_model=Product, tags=["Product"])
 def create_product(product: ProductCreate, session: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
     product_image = session.get(Image, product.image_id)
     if not product_image:
@@ -66,22 +66,23 @@ def read_products(session: Annotated[Session, Depends(db_session)], skip: int = 
     products = session.exec(select(Product).offset(skip).limit(limit)).all()
     return products
 
-@app.get("/products/{product_id}", response_model=Product, tags=["Product"])
-def read_product(product_id: UUID, session: Annotated[Session, Depends(db_session)]):
-    product = session.get(Product, product_id)
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    return product
-
-@app.get("/products/{product_name}", response_model=Product, tags=["Product"])
+@app.get("/search", response_model=List[Product], tags=["Product"])
 def get_product_by_name(product_name: str, session: Annotated[Session, Depends(db_session)]):
     product = session.exec(select(Product).where(Product.name.contains(product_name))).all()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
     return product
 
-@app.delete("/product/{product_id}", tags=["Product"])
-def delete_product(product_id: UUID, session: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
+@app.get("/{product_id}", response_model=Product, tags=["Product"])
+def read_product_by_id(product_id: int, session: Annotated[Session, Depends(db_session)]):
+    product = session.get(Product, product_id)
+    # product = session.exec(select(Product).where(Product.id == product_id)).first()
+    if not product:
+        raise HTTPException(status_code=404, detail="Product not found")
+    return product
+
+@app.delete("/delete", tags=["Product"])
+def delete_product(product_id: int, session: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
     product = session.get(Product, product_id)
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -96,5 +97,4 @@ def delete_product(product_id: UUID, session: Annotated[Session, Depends(db_sess
 
 @app.get("/token", tags=["Auth"])
 async def get_user(token: Annotated[User, Depends(get_current_user)], db: Annotated[Session, Depends(db_session)]):
-    # user = await get_current_user(token, db)
     return token

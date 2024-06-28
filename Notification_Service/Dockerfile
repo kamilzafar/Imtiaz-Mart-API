@@ -12,7 +12,7 @@ RUN pip install poetry
 
 COPY . /microservice5/
 
-RUN poetry config virtualenvs.create false --local || true
+RUN poetry config virtualenvs.create false
 
 RUN poetry install
 

@@ -111,6 +111,7 @@ services:
       - ./User_Service:/microservice1/
     depends_on:
       - postgres_db
+      - broker
 
   service2:
     build:
@@ -133,6 +134,7 @@ services:
       - ./Order_Service:/microservice3/
     depends_on:
       - postgres_db
+      - broker
 
   service4:
     build:
@@ -145,16 +147,17 @@ services:
     depends_on:
       - postgres_db
 
-  # service5:
-  #   build: 
-  #     context: ./Notification_Service
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8007:8007"
-  #   volumes:
-  #     - ./Notification_Service:/microservice5/
-  #   depends_on:
-  #     - postgres_db
+  service5:
+    build: 
+      context: ./Notification_Service
+      dockerfile: Dockerfile
+    ports:
+      - "8007:8007"
+    volumes:
+      - ./Notification_Service:/microservice5/
+    depends_on:
+      - postgres_db
+      - broker
 
   service6:
     build:
@@ -166,6 +169,7 @@ services:
       - ./Payment_Service:/microservice6/
     depends_on:
       - postgres_db
+      - broker
 
   postgres_db:
     image: postgres:latest # Use the official PostgreSQL image

@@ -1,5 +1,4 @@
-x-kong-config:
-  &kong-env
+x-kong-config: &kong-env
   KONG_DATABASE: ${KONG_DATABASE:-postgres}
   KONG_PG_DATABASE: ${KONG_PG_DATABASE:-kong}
   KONG_PG_HOST: db
@@ -103,7 +102,7 @@ services:
       - kong_data:/var/lib/postgresql/data
 
   service1:
-    build: 
+    build:
       context: ./User_Service
       dockerfile: Dockerfile
     ports:
@@ -112,9 +111,9 @@ services:
       - ./User_Service:/microservice1/
     depends_on:
       - postgres_db
-  
+
   service2:
-    build: 
+    build:
       context: ./Product_Service
       dockerfile: Dockerfile
     ports:
@@ -123,9 +122,9 @@ services:
       - ./Product_Service:/microservice2/
     depends_on:
       - postgres_db
-  
+
   service3:
-    build: 
+    build:
       context: ./Order_Service
       dockerfile: Dockerfile
     ports:
@@ -134,18 +133,18 @@ services:
       - ./Order_Service:/microservice3/
     depends_on:
       - postgres_db
-  
-  # service4:
-  #   build: 
-  #     context: ./Inventory_Service
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "8006:8006"
-  #   volumes:
-  #     - ./Inventory_Service:/microservice4/
-  #   depends_on:
-  #     - postgres_db
-  
+
+  service4:
+    build:
+      context: ./Inventory_Service
+      dockerfile: Dockerfile
+    ports:
+      - "8006:8006"
+    volumes:
+      - ./Inventory_Service:/microservice4/
+    depends_on:
+      - postgres_db
+
   # service5:
   #   build: 
   #     context: ./Notification_Service
@@ -156,9 +155,9 @@ services:
   #     - ./Notification_Service:/microservice5/
   #   depends_on:
   #     - postgres_db
-  
+
   service6:
-    build: 
+    build:
       context: ./Payment_Service
       dockerfile: Dockerfile
     ports:
@@ -167,7 +166,7 @@ services:
       - ./Payment_Service:/microservice6/
     depends_on:
       - postgres_db
-  
+
   postgres_db:
     image: postgres:latest # Use the official PostgreSQL image
     restart: always

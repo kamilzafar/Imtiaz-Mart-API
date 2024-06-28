@@ -22,12 +22,12 @@ def service_get_order(db:Session,user:User):
     orders = db.exec(select(Order).where(Order.user_id == user.id)).all()
 
     if orders is None:
-        raise HTTPException(status_code=404, detail="order not found!")
+        raise HTTPException(status_code=200, detail="order not found!")
     for order in orders:
         return order
 
 
-def service_get_order_by_id(session:Session, order_id:int) -> Order:
+def service_get_order_by_id(session:Session, order_id:int,user:User) -> Order:
     """
     This function is used to get a order by its id.
     Args:
@@ -36,7 +36,7 @@ def service_get_order_by_id(session:Session, order_id:int) -> Order:
     Returns:
         Order: The order object.
     """
-    order = session.exec(select(Order).where(Order.order_id == order_id)).first()
+    order = session.exec(select(Order).where(Order.order_id == order_id,Order.user_id == user.id)).first()
     if order is None:
         raise HTTPException(status_code=404, detail="order not found!")
     return order
@@ -89,7 +89,7 @@ def service_create_order(session:Session, order:Order, user:User) -> Order:
     return order 
 
 
-def service_delete_order(session:Session, order_id:int):
+def service_delete_order(session:Session, order_id:int,user:User):
     """
     This function is used to delete an order by its id.
     Args:
@@ -98,7 +98,7 @@ def service_delete_order(session:Session, order_id:int):
     Returns:
         dict: The response message.
     """
-    order = service_get_order_by_id(session, order_id)  
+    order = service_get_order_by_id(session, order_id,user)  
     session.delete(order)
     session.commit()
     return {"message":"order deleted"}
@@ -112,15 +112,21 @@ def service_order_update(session:Session,user:User,order_id:int):
     Returns:
         simplejson: The response message.
     """
-    order = service_get_order_by_id(session,order_id)
+    order = service_get_order_by_id(session,order_id,user)
     if order.order_status == "cancelled":
         service_delete_order_item(session,order_id)
-        service_delete_order(session,order_id)
+        service_delete_order(session,order_id,user)
         return {"message":"Order is cancelled"}
     elif order.order_status == "delivered":
         service_delete_order_item(session,order_id)
-        service_delete_order(session,order_id)
+        service_delete_order(session,order_id,user)
         return {"message":"Order is delivered"}
+
+def service_get_order_item(db:Session,order_id:int,user:User):
+    order = service_get_order_by_id(db,order_id,user)
+    order_items = db.exec(select(OrderItem).where(OrderItem.order_id == order.order_id)).all()
+    for orderitem in order_items:
+        return orderitem
     
 def service_get_cart_from_user(session:Session,user:User):
     carts = session.exec(select(Cart).where(Cart.user_id == user.id)).all()
@@ -172,10 +178,10 @@ def get_user_by_username(session:Session,username:str) -> User:
 
 def service_add_same_product_to_cart(session:Session,user:User,cart_updated_data:Cart):
     cart_row = session.exec(select(Cart).where(Cart.user_id == user.id,Cart.product_id == cart_updated_data.product_id,Cart.product_size == cart_updated_data.product_size)).first()
-    product:Product = session.exec(select(Product).where(Product.product_id == cart_updated_data.product_id)).first() 
+    product:Product = session.exec(select(Product).where(Product.id == cart_updated_data.product_id)).first() 
     if cart_row:
         cart_row.total_cart_products += cart_updated_data.total_cart_products 
-        cart_row.product_total = cart_row.total_cart_products * product.product_price
+        cart_row.product_total = cart_row.total_cart_products * product.price
         session.add(cart_row)
         session.commit()
         return cart_row
@@ -211,8 +217,27 @@ def service_remove_cart(db:Session,user:User):
         db.delete(cart)
     db.commit()
      
+def service_update_cart_add(db:Session,cart_id:int,user:User,product_id:int):
+    cart = db.exec(select(Cart).where(Cart.cart_id == cart_id,Cart.user_id == user.id)).first()
+    product:Product = db.exec(select(Product).where(Product.id == product_id)).first() 
+    if cart is None:
+        raise HTTPException(status_code=404,detail="Cart not found!")
+    cart.total_cart_products +=1
+    cart.product_total = cart.total_cart_products * product.price
+
+def service_update_cart_minus(db:Session,cart_id:int,user:User,product_id:int):
+    cart = db.exec(select(Cart).where(Cart.cart_id == cart_id,Cart.user_id == user.id)).first()
+    product:Product = db.exec(select(Product).where(Product.id == product_id)).first() 
+    if cart is None:
+        raise HTTPException(status_code=404,detail="Cart not found!")
+    cart.total_cart_products -=1
+    cart.product_total = cart.total_cart_products * product.price
 
 
 def service_get_product_from_cart(session:Session,user:User):
-    product_from_cart = session.exec(select(Product).join(Cart).where(Cart.user_id == user.user_id))
+    product_from_cart = session.exec(select(Product).join(Cart).where(Cart.user_id == user.id))
     return product_from_cart
+
+def service_get_cart_by_id(db:Session,cart_id:int,user:User):
+    cart = db.exec(select(Cart).where(Cart.cart_id == cart_id,Cart.user_id == user.id)).first()
+    return cart

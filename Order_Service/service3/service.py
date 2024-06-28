@@ -198,12 +198,19 @@ def service_add_to_cart(session:Session,cart_data:Cart,user:User,product_id:int)
     return cart_data
 
 
-def service_remove_cart(db:Session,user:User,cart_id:int):
+def service_remove_cart_by_id(db:Session,user:User,cart_id:int):
     cart = db.exec(select(Cart).where(Cart.cart_id == cart_id,Cart.user_id == user.id)).first()
     if cart is None:
         raise HTTPException(status_code=404,detail="Cart not found!")
     db.delete(cart)
     db.commit()
+
+def service_remove_cart(db:Session,user:User):
+    carts = db.exec(select(Cart).where(Cart.user_id == user.id)).all()
+    for cart in carts:
+        db.delete(cart)
+    db.commit()
+     
 
 
 def service_get_product_from_cart(session:Session,user:User):

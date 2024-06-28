@@ -66,7 +66,12 @@ def add_to_cart(product_id:int,cart_info:CartCreate,session:Annotated[Session,De
 def get_product_from_cart(session:Annotated[Session,Depends(db_session)],user:Annotated[User, Depends(get_current_user)]):
     return service_get_product_from_cart(session,user)
 
-@app.delete("/removecart")
-def remove_cart(cart_id:int,db:Session = Depends(db_session),user:User = Depends(get_current_user)):
-    service_remove_cart(db,user,cart_id)
+@app.delete("/removecart/{cart_id}")
+def remove_cart_by_id(cart_id:int,db:Session = Depends(db_session),user:User = Depends(get_current_user)):
+    service_remove_cart_by_id(db,user,cart_id)
     return {"message":"Cart is removed"}
+
+@app.delete("removecart")
+def remove_cart(db:Session = Depends(db_session),user:User = Depends(get_current_user)):
+    service_remove_cart(db,user)
+    return {"message":"remove all carts"}

@@ -13,6 +13,7 @@ class OrderStatus(str,Enum):
     PENDING:str = "pending"
     CANCELLED:str = "cancelled"
     DELIVERED:str = "delivered"
+    PAID:str = "paid"
 
 class OrderBase(SQLModel):
     order_status:OrderStatus
@@ -23,6 +24,7 @@ class OrderBase(SQLModel):
 class Order(OrderBase,table = True):
     order_id:int | None = Field(primary_key=True,default=None)
     user_id:UUID | None = Field(foreign_key="user.id",default=None)
+    card_id:int | None = Field(foreign_key="card.id",default=None)
 
 class OrderCreate(OrderBase):
     pass

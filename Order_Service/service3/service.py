@@ -19,12 +19,13 @@ def service_get_order(db:Session,user:User):
     Returns:
         List[Order]: The list of orders.
     """
-    orders = db.exec(select(Order).where(Order.user_id == user.id)).all()
+    orders = db.exec(select(Order)).all()
 
     if orders is None:
         raise HTTPException(status_code=200, detail="order not found!")
-    for order in orders:
-        return order
+    return orders
+    # for order in orders:
+    #     return order
 
 
 def service_get_order_by_id(session:Session, order_id:int,user:User) -> Order:
@@ -118,9 +119,21 @@ def service_order_update(session:Session,user:User,order_id:int):
         service_delete_order(session,order_id,user)
         return {"message":"Order is cancelled"}
     elif order.order_status == "delivered":
-        service_delete_order_item(session,order_id)
-        service_delete_order(session,order_id,user)
         return {"message":"Order is delivered"}
+    elif order.order_status == "paid":
+        return {"message":"Order is paid"}
+    
+def service_get_paid_orders(db:Session):
+    paid_order = db.exec(select(Order).where(Order.order_status == "paid")).all()
+    return paid_order
+
+def service_get_pending_orders(db:Session):
+    pending_order = db.exec(select(Order).where(Order.order_status == "pending")).all()
+    return pending_order
+
+def service_get_delivered_orders(db:Session):
+    delivered_order = db.exec(select(Order).where(Order.order_status == "delivered")).all()
+    return delivered_order
 
 def service_get_order_item(db:Session,order_id:int,user:User):
     order = service_get_order_by_id(db,order_id,user)

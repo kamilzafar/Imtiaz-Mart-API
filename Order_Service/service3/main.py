@@ -26,7 +26,7 @@ app = FastAPI(
 def get_root():
     return {"service":"Order Service"}
 
-@app.get("/getorders", tags=["Order"] )
+@app.get("/getorders", tags=["Order"] ,response_model=list[Order])
 def get_order(db: Annotated[Session, Depends(db_session)],user = Depends(get_current_user)):
     order = service_get_order(db,user)
     return order
@@ -35,6 +35,22 @@ def get_order(db: Annotated[Session, Depends(db_session)],user = Depends(get_cur
 def get_order_by_id(order_id:int,db:Session = Depends(db_session),user:User = Depends(get_current_user)):
     order = service_get_order_by_id(db,order_id,user)
     return order
+
+@app.get("/getdeliveredorders",tags=["Order"],response_model=list[Order])
+def get_delivered_orders(db:Session = Depends(db_session),user:User = Depends(get_current_user)):
+    deivered_order = service_get_delivered_orders(db)
+    return deivered_order
+
+@app.get("/getpaidorders",tags=["Order"],response_model=list[Order])
+def get_delivered_orders(db:Session = Depends(db_session),user:User = Depends(get_current_user)):
+    paid_order = service_get_paid_orders(db)
+    return paid_order
+
+
+@app.get("/getpendingorders",tags=["Order"],response_model=list[Order])
+def get_delivered_orders(db:Session = Depends(db_session),user:User = Depends(get_current_user)):
+    pending_order = service_get_pending_orders(db)
+    return pending_order
 
 @app.post("/createorder", response_model=OrderRead, tags=["Order"])
 def create_order(order_data:OrderCreate,session:Annotated[Session, Depends(db_session)],user = Depends(get_current_user)) -> OrderRead:
@@ -52,7 +68,7 @@ def update_order(order_update:OrderUpdate,order_id,session:Annotated[Session, De
         session.add(order)
         session.commit()
         session.refresh(order)
-        if order_update.order_status == "cancelled" or order_update.order_status == "delivered":
+        if order_update.order_status == "cancelled" or order_update.order_status == "delivered" or order_update.order_status == "paid":
             return service_order_update(session,user,order_id)
         return order 
 

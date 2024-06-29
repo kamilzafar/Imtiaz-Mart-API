@@ -1,9 +1,10 @@
+from aiokafka import AIOKafkaProducer
 from fastapi import FastAPI, Depends, HTTPException, status
 from sqlmodel import select, Session
 from typing import Annotated
 from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
-from service1.curd import signup_user, get_current_user, get_user_by_username, verify_password, check_admin
+from service1.curd import produce_message, signup_user, get_current_user, get_user_by_username, verify_password, check_admin
 from service1.db import *
 from service1.services import *
 from service1.models import *
@@ -48,9 +49,9 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
     return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": access_token_expires+refresh_token_expires, "token_type": "bearer"}
 
 @app.post("/signup", response_model=User, tags=["Users"])
-async def signup(db: Annotated[Session, Depends(db_session)], user: UserCreate ):
+async def signup(db: Annotated[Session, Depends(db_session)], user: UserCreate, producer: Annotated[AIOKafkaProducer, Depends(produce_message)]):
     try:
-        return signup_user(user, db)
+        return await signup_user(user, db, producer)
     except Exception as e:
         raise HTTPException(status_code=400,detail=str(e))
 

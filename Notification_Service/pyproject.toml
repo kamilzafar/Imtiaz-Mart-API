@@ -11,6 +11,9 @@ python = "^3.11"
 fastapi = "^0.111.0"
 sqlmodel = "^0.0.19"
 uvicorn = {extras = ["standard"], version = "^0.30.1"}
+aiokafka = "^0.10.0"
+protobuf = "^5.27.2"
+fastapi-mail = "^1.4.1"
 
 [build-system]
 requires = ["poetry-core"]

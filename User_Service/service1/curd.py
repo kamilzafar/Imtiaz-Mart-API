@@ -7,9 +7,21 @@ from jose import JWTError, jwt
 from service1.db import db_session
 from service1.models import *
 from service1.services import *
+from aiokafka import AIOKafkaProducer
+import service1.user_pb2 as user_pb2
+from service1 import settings
 
+async def produce_message():
+    producer = AIOKafkaProducer(bootstrap_servers=settings.KAFKA_BROKER_URL)
+    await producer.start()
+    try:
+        # Produce message
+        yield producer
+    finally:
+        # Wait for all pending messages to be delivered or expire.
+        await producer.stop()
 
-def signup_user(user: UserCreate, db: Session) -> User:
+async def signup_user(user: UserCreate, db: Session, producer: Annotated[AIOKafkaProducer, Depends(produce_message)]) -> User:
     """
     Create a new user.
     Args:
@@ -30,6 +42,9 @@ def signup_user(user: UserCreate, db: Session) -> User:
 
     new_user = User(id = uuid4(), username=user.username, email=user.email, password=hashed_password, role=user.role)
     add_consumer_to_kong(new_user.username)
+    user_data = user_pb2.User(username=new_user.username, email=new_user.email)
+    serialized_user = user_data.SerializeToString()
+    await producer.send_and_wait(settings.KAFKA_PRODUCER_TOPIC, serialized_user)
 
     db.add(new_user)
     db.commit()

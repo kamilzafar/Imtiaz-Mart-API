@@ -2,10 +2,9 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from service5.db import create_db_and_tables
 import asyncio
-from service5.services import user_consumer_task
+from service5.services import user_consumer_task, order_consumer_task
 from service5 import settings
 from fastapi_mail import FastMail, MessageSchema,ConnectionConfig
-from starlette.requests import Request
 from starlette.responses import JSONResponse
 from pydantic import EmailStr, BaseModel
 from typing import List
@@ -17,11 +16,12 @@ conf = ConnectionConfig(
     MAIL_USERNAME=settings.smtp_email,
     MAIL_PASSWORD= settings.SMTP_PASSWORD,
     MAIL_PORT=465,
-    MAIL_SERVER="smtp.gmail.com",
+    MAIL_SERVER=settings.smtp_server,
     MAIL_STARTTLS = False,
     MAIL_SSL_TLS = True,
     USE_CREDENTIALS = True,
     VALIDATE_CERTS = True,
+    MAIL_FROM=settings.smtp_email
 )
 
 @asynccontextmanager
@@ -29,6 +29,7 @@ async def lifespan(app: FastAPI):
     print("Starting up")
     create_db_and_tables()
     asyncio.create_task(user_consumer_task())
+    asyncio.create_task(order_consumer_task())
     yield
 
 app = FastAPI(
@@ -47,25 +48,14 @@ def read_root():
 
 @app.post("/send_mail")
 async def send_mail(email: EmailSchema):
- 
-    template = """
-        <html>
-        <body>
-         
- 
-        <p>Hi !!!
-        <br>Thanks for using fastapi mail, keep using it..!!!</p>
- 
- 
-        </body>
-        </html>
-        """
+
+    body = f"Hi! ,\n\nYour order has been placed successfully!\n\nBest regards,\nKR Mart Team"
  
     message = MessageSchema(
-        subject="Fastapi-Mail module",
+        subject="Order Confirmation",
         recipients=email.dict().get("email"),  # List of recipients, as many as you can pass 
-        body=template,
-        subtype="html"
+        body=body,
+        subtype="plain"
         )
  
     fm = FastMail(conf)

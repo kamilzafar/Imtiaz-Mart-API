@@ -5,6 +5,7 @@ from fastapi import FastAPI
 from service3.service import *
 from service3.db import create_db_and_tables, db_session
 from typing import Annotated
+from aiokafka import AIOKafkaProducer
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -53,10 +54,10 @@ def get_delivered_orders(db:Session = Depends(db_session),user:User = Depends(ge
     return pending_order
 
 @app.post("/createorder", response_model=OrderRead, tags=["Order"])
-def create_order(order_data:OrderCreate,session:Annotated[Session, Depends(db_session)],user = Depends(get_current_user)) -> OrderRead:
+async def create_order(order_data:OrderCreate, session:Annotated[Session, Depends(db_session)],user: Annotated[User, Depends(get_current_user)], producer: Annotated[AIOKafkaProducer, Depends(produce_message)]) -> OrderRead:
     
     order_info = Order.model_validate(order_data)
-    order = service_create_order(session, order_info,user)
+    order = await service_create_order(session, order_info,user, producer)
     return order
 
 @app.patch("/updateorder", tags=["Order"])

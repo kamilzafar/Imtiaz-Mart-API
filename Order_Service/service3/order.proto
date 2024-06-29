@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+message Order {
+    int64 order_id = 1;
+    string username = 2;
+    string useremail = 3;
+}

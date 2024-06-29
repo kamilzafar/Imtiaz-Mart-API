@@ -6,10 +6,20 @@ from service3.models import *
 from typing import Annotated
 from service3 import setting
 from service3.db import db_session
+import service3.order_pb2 as order_pb2
+from aiokafka import AIOKafkaProducer
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
-
+async def produce_message():
+    producer = AIOKafkaProducer(bootstrap_servers=setting.KAFKA_BOOTSTRAP_SERVER)
+    await producer.start()
+    try:
+        # Produce message
+        yield producer
+    finally:
+        # Wait for all pending messages to be delivered or expire.
+        await producer.stop()
 
 def service_get_order(db:Session,user:User):
     """
@@ -58,7 +68,7 @@ def service_delete_order_item(session:Session,order_id:int):
     session.commit()
     return {"message":"Order item deleted!"}
 
-def service_create_order(session:Session, order:Order, user:User) -> Order:
+async def service_create_order(session:Session, order:Order, user:User, producer: Annotated[AIOKafkaProducer, Depends(produce_message)]) -> Order:
     """
     This function is used to create a new order.
     Args:
@@ -68,6 +78,9 @@ def service_create_order(session:Session, order:Order, user:User) -> Order:
     Returns:
         Order: The order object.
     """
+    existing_user = session.exec(select(User).where(User.id == user.id)).first()
+    if not existing_user:
+        raise HTTPException(status_code=404, detail="User not found!")
     existing_order = session.exec(select(Order).where(Order.order_id == order.order_id,Order.user_id == user.id)).first()
     if existing_order:
         raise HTTPException(status_code=404, detail="order is already present!")
@@ -76,6 +89,9 @@ def service_create_order(session:Session, order:Order, user:User) -> Order:
         raise HTTPException(status_code=404,detail="Cart is Empty!")
     
     order.user_id = user.id
+    Kafka_order = order_pb2.Order(order_id = order.order_id, username= user.username, useremail = user.email)
+    serialized_order = Kafka_order.SerializeToString()
+    await producer.send_and_wait(setting.KAFKA_ORDER_TOPIC,serialized_order)
     session.add(order)
     session.commit()
     session.refresh(order)

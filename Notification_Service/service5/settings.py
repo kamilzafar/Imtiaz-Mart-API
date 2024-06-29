@@ -7,7 +7,7 @@ except FileNotFoundError:
 
 DATABASE_URL = config("DATABASE_URL", cast=str)
 KAFKA_GROUP_ID = config("KAFKA_GROUP_ID", cast=str)
-KAFKA_BROKER_URL = config("KAFKA_BROKER_URL", cast=str) 
+KAFKA_BOOTSTRAP_SERVER = config("KAFKA_BOOTSTRAP_SERVER", cast=str) 
 KAFKA_CONSUMER_TOPIC = config("KAFKA_CONSUMER_TOPIC", cast=str)
 smtp_server = config("smtp_server", cast=str)
 smtp_port = config("smtp_port", cast=int)

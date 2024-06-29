@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from service5.db import create_db_and_tables
 import asyncio
-from service5.services import consumer_task, send_email
+from service5.services import user_consumer_task
 from service5 import settings
 from fastapi_mail import FastMail, MessageSchema,ConnectionConfig
 from starlette.requests import Request
@@ -14,7 +14,7 @@ class EmailSchema(BaseModel):
    email: List[EmailStr]
 
 conf = ConnectionConfig(
-    MAIL_USERNAME="kamilzafar54@gmail.com",
+    MAIL_USERNAME=settings.smtp_email,
     MAIL_PASSWORD= settings.SMTP_PASSWORD,
     MAIL_PORT=465,
     MAIL_SERVER="smtp.gmail.com",
@@ -22,14 +22,13 @@ conf = ConnectionConfig(
     MAIL_SSL_TLS = True,
     USE_CREDENTIALS = True,
     VALIDATE_CERTS = True,
-    MAIL_FROM="kamilzafar65@gmail.com"
 )
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting up")
     create_db_and_tables()
-    asyncio.create_task(consumer_task(settings.KAFKA_CONSUMER_TOPIC, settings.KAFKA_BROKER_URL))
+    asyncio.create_task(user_consumer_task())
     yield
 
 app = FastAPI(

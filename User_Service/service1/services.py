@@ -172,21 +172,22 @@ def add_consumer_to_kong(username: str):
 
     consumer = response.json()
 
-    url = f"{KONG_ADMIN_URL}/consumers/{consumer['id']}/jwt"
-    jwt_data = {
-        "algorithm": ALGORITHM,
-        "key": "sub",
-        "secret": SECRET_KEY
-    }
-    jwt_response = requests.post(url, data=jwt_data)
+    # url = f"{KONG_ADMIN_URL}/consumers/{consumer['id']}/jwt"
+    # jwt_data = {
+    #     "algorithm": ALGORITHM,
+    #     "key": "sub",
+    #     "secret": SECRET_KEY
+    # }
+    # jwt_headers = {"Content-Type": "application/json"}
+    # jwt_response = requests.post(url, json.dumps(jwt_data), headers=jwt_headers)
 
-    if jwt_response.status_code != 201:
-        print(f"Failed to create JWT credential: {jwt_response.status_code} {jwt_response.text}")
-        raise HTTPException(status_code=500, detail="Failed to create JWT credential for consumer")
+    # if jwt_response.status_code != 201:
+    #     print(f"Failed to create JWT credential: {jwt_response.status_code} {jwt_response.text}")
+    #     raise HTTPException(status_code=500, detail="Failed to create JWT credential for consumer")
 
-    jwt_credential = jwt_response.json()
+    # jwt_credential = jwt_response.json()
 
-    consumer['jwt'] = jwt_credential
+    # consumer['jwt'] = jwt_credential
     return consumer
 
 def delete_consumer_from_kong(username: str):

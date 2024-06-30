@@ -19,12 +19,12 @@ class OrderBase(SQLModel):
     order_status:OrderStatus
     customer_name:str
     customer_email:str
-
+    customer_address:str
+    customer_phoneno:str
 
 class Order(OrderBase,table = True):
     order_id:int | None = Field(primary_key=True,default=None)
     user_id:UUID | None = Field(foreign_key="user.id",default=None)
-    # card_id:int | None = Field(foreign_key="card.id",default=None)
 
 class OrderCreate(OrderBase):
     pass

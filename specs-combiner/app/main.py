@@ -26,8 +26,8 @@ def fetch_openapi_specs():
         {"name": "microservice1", "url": "http://host.docker.internal:8003/openapi.json", "base_route": "/auth"},
         {"name": "microservice2", "url": "http://host.docker.internal:8004/openapi.json", "base_route": "/product"},
         {"name": "microservice3", "url": "http://host.docker.internal:8005/openapi.json", "base_route": "/order"},
-        # {"name": "microservice4", "url": "http://host.docker.internal:8006/openapi.json", "base_route": "/inventory"},
-        # {"name": "microservice5", "url": "http://host.docker.internal:8007/openapi.json", "base_route": "/notification"},
+        {"name": "microservice4", "url": "http://host.docker.internal:8006/openapi.json", "base_route": "/inventory"},
+        {"name": "microservice5", "url": "http://host.docker.internal:8007/openapi.json", "base_route": "/notification"},
         {"name": "microservice6", "url": "http://host.docker.internal:8008/openapi.json", "base_route": "/payment"}
     ]
     specs = []

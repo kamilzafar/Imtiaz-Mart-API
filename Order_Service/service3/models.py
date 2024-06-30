@@ -24,7 +24,7 @@ class OrderBase(SQLModel):
 class Order(OrderBase,table = True):
     order_id:int | None = Field(primary_key=True,default=None)
     user_id:UUID | None = Field(foreign_key="user.id",default=None)
-    card_id:int | None = Field(foreign_key="card.id",default=None)
+    # card_id:int | None = Field(foreign_key="card.id",default=None)
 
 class OrderCreate(OrderBase):
     pass

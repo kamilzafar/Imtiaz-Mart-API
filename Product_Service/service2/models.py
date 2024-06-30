@@ -32,7 +32,6 @@ class ProductBase(SQLModel):
     name: str
     description: str
     price: int
-    stock: int
     category: Category = Field(default=Category.clothing,sa_column=Column("category", Enum(Category)))
     image_id: int = Field(foreign_key="image.id")
 

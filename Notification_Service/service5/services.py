@@ -62,7 +62,7 @@ async def order_consumer_task():
             order_data.ParseFromString(msg.value)
             subject = "Order Confirmation"
             body = f"Hi {order_data.username},\n\nYour order {order_data.order_id} has been placed successfully!\n\nBest regards,\nKR Mart Team"
-            send_email(order_data.email, order_data.username, subject, body)
+            send_email(order_data.useremail, order_data.username, subject, body)
             print(f"Order message processed: {order_data.order_id}")
     finally:
         await consumer.stop()

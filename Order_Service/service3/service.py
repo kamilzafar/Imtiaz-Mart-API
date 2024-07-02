@@ -81,9 +81,7 @@ async def service_create_order(session:Session, order_data:Order, user:User, pro
     existing_user = session.exec(select(User).where(User.id == user.id)).first()
     if not existing_user:
         raise HTTPException(status_code=404, detail="User not found!")
-    existing_order = session.exec(select(Order).where(Order.order_id == order_data.order_id,Order.user_id == user.id)).first()
-    if existing_order:
-        raise HTTPException(status_code=404, detail="order is already present!")
+    
     carts = session.exec(select(Cart).where(Cart.user_id == user.id)).all()
     if not carts:
         raise HTTPException(status_code=404,detail="Cart is Empty!")

@@ -22,7 +22,7 @@ def main():
     return {"message":"Inventory service"}
 
 
-@app.get("/inventory")
+@app.get("/get-inventory")
 def get_inventory(db:Annotated[Session,Depends(db_session)]):
     invetory = service_get_inventory(db)
     return invetory

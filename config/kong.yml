@@ -13,15 +13,6 @@ services:
           - POST
           - PATCH
           - DELETE
-        # plugins:
-        #   - name: jwt
-        #     config:
-        #       claims_to_verify:
-        #         - exp
-        #       key_claim_name: iss
-        #       secret_is_base64: false
-        #       uri_param_names:
-        #         - jwt
   
   - name: product-service
     url: http://host.docker.internal:8004
@@ -34,8 +25,6 @@ services:
           - POST
           - PATCH
           - DELETE
-        # plugins:
-        #   - name: jwt
     
   - name: order-service
     url: http://host.docker.internal:8005
@@ -48,8 +37,6 @@ services:
           - POST
           - PATCH
           - DELETE
-        # plugins:
-        #   - name: jwt
 
   - name: inventory-service
     url: http://host.docker.internal:8006
@@ -62,8 +49,6 @@ services:
           - POST
           - PATCH
           - DELETE
-        # plugins:
-        #   - name: jwt
 
   - name: notification-service
     url: http://host.docker.internal:8007
@@ -76,8 +61,6 @@ services:
           - POST
           - PATCH
           - DELETE
-        # plugins:
-        #   - name: jwt
 
   - name: payment-service
     url: http://host.docker.internal:8008
@@ -90,5 +73,3 @@ services:
           - POST
           - PATCH
           - DELETE
-        # plugins:
-        #   - name: jwt

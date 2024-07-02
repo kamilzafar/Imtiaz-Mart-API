@@ -4,7 +4,6 @@ from typing import Annotated, List
 from service2.services import get_current_user, check_admin
 from service2.models import User, Product, ProductCreate, Image
 from sqlmodel import Session, select
-from uuid import UUID, uuid4
 import io
 from service2.db import db_session, lifespan
 
@@ -13,9 +12,7 @@ app = FastAPI(
     description="Manages product catalog, including CRUD operations for products.",
     version="0.1",
     lifespan=lifespan,
-    openapi_url="/openapi.json",
     root_path="/product",
-    docs_url="/docs"
 )
 
 @app.get("/", tags=["Root"])

@@ -6,7 +6,6 @@ import logging
 from jsonmerge import merge
 
 app = FastAPI(
-    docs_url="/docs", 
     root_path="/specs-combiner"
     )
 

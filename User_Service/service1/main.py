@@ -13,9 +13,7 @@ app = FastAPI(
     title="User Service", 
     description="Manages user authentication, registration, and profiles.",
     version="0.1.0",
-    docs_url="/docs", 
     lifespan=lifespan,
-    openapi_url="/openapi.json",
     root_path="/auth"
     )
 

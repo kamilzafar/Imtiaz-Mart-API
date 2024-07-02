@@ -1,4 +1,3 @@
-from fastapi import FastAPI
 from fastapi import FastAPI, Depends
 from typing import Annotated
 from sqlmodel import Session
@@ -12,14 +11,12 @@ app = FastAPI(
     description="Manages stock levels and inventory updates",
     version="0.1",
     lifespan=lifespan,
-    docs_url="/docs",
-    openapi_url="/openapi.json",
     root_path="/inventory"
 )
 
 @app.get("/")
 def main():
-    return {"message":"Inventory service"}
+    return {"service":"Inventory service"}
 
 
 @app.get("/get-inventory")

@@ -5,8 +5,6 @@ app = FastAPI(
     title="Payment Service",
     description="Processes payments and manages transaction records.",
     version="0.1",
-    docs_url="/docs",
-    openapi_url="/openapi.json",
     root_path="/payment"
 )
 

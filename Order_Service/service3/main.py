@@ -18,8 +18,6 @@ app = FastAPI(
     description="Handles order creation, updating, and tracking",
     version="0.1",
     lifespan=lifespan,
-    docs_url="/docs",
-    openapi_url="/openapi.json",
     root_path="/order"
 )
 

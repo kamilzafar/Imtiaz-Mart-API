@@ -34,11 +34,9 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Notification Service", 
-    description=" Sends notifications (email, SMS) to users about order statuses and other updates.",
+    description="Sends notifications (email, SMS) to users about order statuses and other updates.",
     version="0.1.0",
-    docs_url="/docs", 
     lifespan=lifespan,
-    openapi_url="/openapi.json",
     root_path="/notification"
     )
 

@@ -4,10 +4,7 @@ from sqlmodel import SQLModel,Field,Column
 from enum import Enum
 from datetime import timedelta
 
-class Size(str,Enum):
-    LARGE:str = "large"
-    SMALL:str = "small"
-    MEDIUM:str = "medium"
+
 
 class OrderStatus(str,Enum):
     PENDING:str = "pending"
@@ -16,20 +13,22 @@ class OrderStatus(str,Enum):
     PAID:str = "paid"
 
 class OrderBase(SQLModel):
-    order_status:OrderStatus
     customer_name:str
     customer_email:str
     customer_address:str
     customer_phoneno:str
+    customer_city:str
 
 class Order(OrderBase,table = True):
     order_id:int | None = Field(primary_key=True,default=None)
     user_id:UUID | None = Field(foreign_key="user.id",default=None)
+    order_status:OrderStatus
+
 
 class OrderCreate(OrderBase):
     pass
 
-class OrderUpdate(SQLModel):
+class OrderUpdate(OrderBase):
     order_status:OrderStatus
 
 class OrderRead(OrderBase):
@@ -38,7 +37,6 @@ class OrderRead(OrderBase):
 class OrderItemBase(SQLModel):
     total_cart_products:int
     product_total:int
-    product_size:Size
 
 class OrderItem(OrderItemBase,table =True):
     orderitem_id:int | None = Field(primary_key=True,default=None)
@@ -60,7 +58,6 @@ class User(UserBase, table=True):
 class CartBase(SQLModel):
     total_cart_products:int
     product_total:int
-    product_size:Size
 
 class Cart(CartBase,table = True):
     cart_id:int | None = Field(primary_key=True,default=None)

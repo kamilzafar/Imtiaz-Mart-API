@@ -68,7 +68,7 @@ def service_delete_order_item(session:Session,order_id:int):
     session.commit()
     return {"message":"Order item deleted!"}
 
-async def service_create_order(session:Session, order:Order, user:User, producer: Annotated[AIOKafkaProducer, Depends(produce_message)]) -> Order:
+async def service_create_order(session:Session, order_data:Order, user:User, producer: Annotated[AIOKafkaProducer, Depends(produce_message)]) -> Order:
     """
     This function is used to create a new order.
     Args:
@@ -81,29 +81,29 @@ async def service_create_order(session:Session, order:Order, user:User, producer
     existing_user = session.exec(select(User).where(User.id == user.id)).first()
     if not existing_user:
         raise HTTPException(status_code=404, detail="User not found!")
-    existing_order = session.exec(select(Order).where(Order.order_id == order.order_id,Order.user_id == user.id)).first()
+    existing_order = session.exec(select(Order).where(Order.order_id == order_data.order_id,Order.user_id == user.id)).first()
     if existing_order:
         raise HTTPException(status_code=404, detail="order is already present!")
     carts = session.exec(select(Cart).where(Cart.user_id == user.id)).all()
     if not carts:
         raise HTTPException(status_code=404,detail="Cart is Empty!")
     
-    order.user_id = user.id
-    Kafka_order = order_pb2.Order(order_id = order.order_id, username= user.username, useremail = user.email)
+    order_data.user_id = user.id
+    Kafka_order = order_pb2.Order(order_id = order_data.order_id, username= order_data.customer_name, useremail = order_data.customer_email)
     serialized_order = Kafka_order.SerializeToString()
     await producer.send_and_wait(setting.KAFKA_ORDER_TOPIC,serialized_order)
-    session.add(order)
+    session.add(order_data)
     session.commit()
-    session.refresh(order)
+    session.refresh(order_data)
     carts:Cart = service_get_cart_from_user(session,user)
     for cart in carts:
-        if order:
-            service_create_order_item(session,user,cart,order.order_id)
+        if order_data:
+            service_create_order_item(session,user,cart,order_data.order_id)
     
     for cart in carts:
         session.delete(cart)
         session.commit()  
-    return order 
+    return order_data 
 
 
 def service_delete_order(session:Session, order_id:int,user:User):

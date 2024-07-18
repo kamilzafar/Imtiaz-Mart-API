@@ -14,11 +14,6 @@ engine = create_engine(
 def create_db_and_tables():
     SQLModel.metadata.create_all(engine)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("Creating database connection")
-    create_db_and_tables()
-    yield
 
 def db_session():
     with Session(engine) as session:

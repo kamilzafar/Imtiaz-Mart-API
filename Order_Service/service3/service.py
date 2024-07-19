@@ -204,8 +204,11 @@ def get_user_by_username(session:Session,username:str) -> User:
 
 
 def service_add_same_product_to_cart(session:Session,user:User,cart_updated_data:Cart):
-    cart_row = session.exec(select(Cart).where(Cart.user_id == user.id,Cart.product_id == cart_updated_data.product_id,Cart.product_size == cart_updated_data.product_size)).first()
+    cart_row = session.exec(select(Cart).where(Cart.user_id == user.id,Cart.product_id == cart_updated_data.product_id)).first()
     product:Product = session.exec(select(Product).where(Product.id == cart_updated_data.product_id)).first() 
+    inventory = session.exec(select(Inventory).where(Inventory.product_id == product.id)).first()
+    if cart_row.total_cart_products > inventory.quantity:
+        raise HTTPException(status_code=200,detail="We are out of stock!")
     if cart_row:
         cart_row.total_cart_products += cart_updated_data.total_cart_products 
         cart_row.product_total = cart_row.total_cart_products * product.price
@@ -217,10 +220,12 @@ def service_add_to_cart(session:Session,cart_data:Cart,user:User,product_id:int)
     
     if not user:
         raise HTTPException(status_code=401,detail="User not found!")
-    
+    inventory = session.exec(select(Inventory).where(Inventory.product_id == product_id)).first()
+    if cart_data.total_cart_products > inventory.quantity:
+        raise HTTPException(status_code=200,detail="We are out of stock!")
     cart_data.user_id = user.id
     cart_data.product_id = product_id
-    cart = session.exec(select(Cart).where(Cart.user_id == user.id,Cart.product_id == product_id, Cart.product_size == cart_data.product_size)).first()
+    cart = session.exec(select(Cart).where(Cart.user_id == user.id,Cart.product_id == product_id)).first()
     if cart:
         return service_add_same_product_to_cart(session,user,cart_data)
     session.add(cart_data)

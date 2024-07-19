@@ -117,3 +117,22 @@ class ProductCreate(ProductBase):
 
 class ProductUpdate(ProductBase):
     pass
+
+class InventoryBase(SQLModel):
+    inventory_name:str
+    inventory_description:str
+    quantity:int 
+
+class Inventory(InventoryBase,table=True):
+    inventory_id:int | None = Field(primary_key=True,default=None)
+    product_id:int | None = Field(foreign_key="product.id",default=None)
+    user_id:UUID | None = Field(foreign_key="user.id",default=None)
+
+class InventoryCreate(InventoryBase):
+    product_id:int | None
+
+class InventoryUpdate(SQLModel):
+    quantity:int 
+
+class InventoryRead(InventoryBase):
+    pass

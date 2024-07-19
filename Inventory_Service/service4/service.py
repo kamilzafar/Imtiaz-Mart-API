@@ -59,7 +59,7 @@ def get_user_by_username(session:Session,username:str) -> User:
 # Inventory
 
 def service_get_inventory(db:Session,user:User):
-    inventories = db.exec(select(Inventory)).all()
+    inventories = db.exec(select(Inventory).where(Inventory.user_id == user.id)).all()
     for inventory in inventories:
         return inventory
     

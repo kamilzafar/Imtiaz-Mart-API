@@ -11,7 +11,7 @@ class UserBase(SQLModel):
     username: str = Field(nullable=False)
     password: str = Field(nullable=False)
 
-class User(UserBase, table=True):
+class User(UserBase):
     id: Optional[UUID] = Field(primary_key=True, index=True)
     email: str = Field(index=True, unique=True, nullable=False)
     role: UserRole = Field(default=UserRole.user, sa_column=Column("role", Enum(UserRole)))

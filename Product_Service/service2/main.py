@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, HTTPException
 from fastapi.responses import StreamingResponse
 from typing import Annotated, List
-from service2.services import get_current_user, check_admin
+from service2.services import check_admin
 from service2.models import User, Product, ProductCreate, Image
 from sqlmodel import Session, select
 import io
@@ -92,6 +92,3 @@ def delete_product(product_id: int, session: Annotated[Session, Depends(db_sessi
     session.commit()
     return {"message": "Product deleted successfully."}
 
-@app.get("/token", tags=["Auth"])
-async def get_user(token: Annotated[User, Depends(get_current_user)], db: Annotated[Session, Depends(db_session)]):
-    return token

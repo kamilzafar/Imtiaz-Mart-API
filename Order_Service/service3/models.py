@@ -1,91 +1,82 @@
 from typing import Optional
 from uuid import UUID
-from sqlmodel import SQLModel,Field,Column
+from sqlmodel import SQLModel,Field
 from enum import Enum
-from datetime import timedelta
-
-
 
 class OrderStatus(str,Enum):
-    PENDING:str = "pending"
-    CANCELLED:str = "cancelled"
-    DELIVERED:str = "delivered"
-    PAID:str = "paid"
+    PENDING: str = "pending"
+    CANCELLED: str = "cancelled"
+    DELIVERED: str = "delivered"
+    PAID: str = "paid"
 
 class OrderBase(SQLModel):
-    customer_name:str
-    customer_email:str
-    customer_address:str
-    customer_phoneno:str
-    customer_city:str
+    username: str
+    email: str
+    address: str
+    contactnumber: str
+    city: str
 
 class Order(OrderBase,table = True):
-    order_id:int | None = Field(primary_key=True,default=None)
-    user_id:UUID | None = Field(foreign_key="user.id",default=None)
-    order_status:OrderStatus
-
+    order_id: int = Field(primary_key=True,default=None)
+    user_id: UUID 
+    order_status: OrderStatus = Field(default="pending")
 
 class OrderCreate(OrderBase):
     pass
 
 class OrderUpdate(OrderBase):
-    order_status:OrderStatus
+    order_status: OrderStatus
 
 class OrderRead(OrderBase):
     pass
 
-class OrderItemBase(SQLModel):
-    total_cart_products:int
-    product_total:int
-
-class OrderItem(OrderItemBase,table =True):
-    orderitem_id:int | None = Field(primary_key=True,default=None)
-    order_id:int | None = Field(foreign_key="order.order_id",default=None)
-    user_id:UUID | None = Field(foreign_key="user.id",default=None)
-    product_id:int | None = Field(foreign_key="product.id",default=None)
+class OrderItem(SQLModel,table =True):
+    id: int = Field(primary_key=True,default=None)
+    order_id: int 
+    user_id: UUID 
+    product_id: int 
+    price: int
+    quantity: int
 
 class OrderItemCreate(OrderBase):
     pass
+
+
+class UserRole(str, Enum):
+    admin = "admin"
+    user = "user"
 
 class UserBase(SQLModel):
     username: str = Field(nullable=False)
     password: str = Field(nullable=False)
     email: str = Field(index=True, unique=True, nullable=False)
     
-class User(UserBase, table=True):
+class User(UserBase):
     id: Optional[UUID] = Field(primary_key=True, index=True)
+    role: UserRole = Field(default="user")
+
 
 class CartBase(SQLModel):
-    total_cart_products:int
-    product_total:int
+    product_id: int
+    quantity: int
 
-class Cart(CartBase,table = True):
-    cart_id:int | None = Field(primary_key=True,default=None)
-    user_id:UUID | None = Field(foreign_key="user.id",default=None)
-    product_id:int | None = Field(foreign_key="product.id",default=None) 
+class Cart(CartBase,table = True): 
+    cart_id: int = Field(primary_key=True,default=None)
+    user_id: UUID 
+    product_total: int
 
-class CartCreate(CartBase):
+class CartCreate(CartBase): 
     pass    
 
 class CartUpdate(CartBase):
     pass
 
 class CartRead(CartBase):
-    cart_id:int
-    user_id:UUID
-    product_id:int
+    cart_id: int
+    user_id: UUID
+    product_id: int
 
-class Token(SQLModel):
-    access_token: str
-    refresh_token: str
-    token_type: str
-    expires_in: timedelta
-
-class TokenData(SQLModel):
-    username: str
-
-
-class Image(SQLModel, table=True):
+class Image(SQLModel):
     id: Optional[int] = Field(default=None, primary_key=True, index=True)
     filename: str
     content_type: str
@@ -101,13 +92,12 @@ class ProductBase(SQLModel):
     name: str
     description: str
     price: int
-    stock: int
     category: Category
-    image_id: int = Field(foreign_key="image.id")
+    image_id: int = Field()
 
-class Product(ProductBase, table=True):
+class Product(ProductBase):
     id: Optional[int] = Field(default=None, primary_key=True, index=True)
-    user_id: UUID | None = Field(foreign_key="user.id")
+    user_id: UUID
 
 class ProductRead(ProductBase):
     id: int
@@ -119,20 +109,18 @@ class ProductUpdate(ProductBase):
     pass
 
 class InventoryBase(SQLModel):
-    inventory_name:str
-    inventory_description:str
-    quantity:int 
+    inventory_name: str
+    quantity: int 
 
-class Inventory(InventoryBase,table=True):
-    inventory_id:int | None = Field(primary_key=True,default=None)
-    product_id:int | None = Field(foreign_key="product.id",default=None)
-    user_id:UUID | None = Field(foreign_key="user.id",default=None)
+class Inventory(InventoryBase, table=True):
+    inventory_id: int = Field(primary_key=True,default=None)
+    product_id: int
 
-class InventoryCreate(InventoryBase):
-    product_id:int | None
+class InventoryCreate(InventoryBase): 
+    product_id: int
 
-class InventoryUpdate(SQLModel):
-    quantity:int 
+class InventoryUpdate(SQLModel): 
+    quantity: int 
 
-class InventoryRead(InventoryBase):
+class InventoryRead(InventoryBase): 
     pass

@@ -16,9 +16,10 @@ class OrderBase(SQLModel):
     contactnumber: str
     city: str
 
-class Order(OrderBase,table = True):
+class Order(OrderBase, table = True):
     order_id: int = Field(primary_key=True,default=None)
     user_id: UUID 
+    total_price: int
     order_status: OrderStatus = Field(default="pending")
 
 class OrderCreate(OrderBase):

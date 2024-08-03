@@ -21,7 +21,7 @@ async def produce_message():
         # Wait for all pending messages to be delivered or expire.
         await producer.stop()
 
-def get_product(product_id: int):
+def get_product(product_id: int) -> Product:
     """
     This fnction is used to get product from product service.
     Args:
@@ -35,7 +35,7 @@ def get_product(product_id: int):
     product = Product(**response.json())
     return product
 
-def service_get_order(db:Session, user:User):
+def service_get_order(db: Session, user: User) -> List[Order]:
     """
     This function is used to get all orders.
     Args:
@@ -62,29 +62,7 @@ def service_get_order_by_id(session: Session, order_id: int, user: User) -> Orde
         raise HTTPException(status_code=404, detail="order not found!")
     return order
 
-
-def service_create_order_item(session: Session, user: User, order_item_data: Cart, order_id: int):
-    orderitem = OrderItem(
-        order_id=order_id,
-        product_id=order_item_data.product_id, 
-        price=order_item_data.product_total,
-        user_id=user.id,
-        quantity=order_item_data.quantity
-    )
-    session.add(orderitem)
-    session.commit()
-    session.refresh(orderitem)
-    return orderitem
-
-
-def service_delete_order_item(session: Session, order_id: int):
-    orderitems = session.exec(select(OrderItem).where(OrderItem.order_id == order_id)).all()
-    for orderitem in orderitems:
-        session.delete(orderitem)
-    session.commit()
-    return {"message":"Order item deleted!"}
-
-async def service_create_order(session: Session, order_data: Order, user: User, producer: Annotated[AIOKafkaProducer, Depends(produce_message)]) -> Order:
+async def service_create_order(session: Session, order: OrderCreate, user: User, producer: Annotated[AIOKafkaProducer, Depends(produce_message)]) -> Order:
     """
     This function is used to create a new order.
     Args:
@@ -94,23 +72,59 @@ async def service_create_order(session: Session, order_data: Order, user: User, 
     Returns:
         Order: The order object.
     """
-    carts = session.exec(select(Cart).where(Cart.user_id == user.id)).all()
-    if not carts:
-        raise HTTPException(status_code=404,detail="Cart is Empty!")
-    order_data.user_id = user.id
-    Kafka_order = order_pb2.Order(order_id = order_data.order_id, username= order_data.customer_name, useremail = order_data.customer_email)
+    carts: List[Cart] = session.exec(select(Cart).where(Cart.user_id == user.id)).all()
+    order_total = sum(item.product_total for item in carts)
+    order_data = Order(
+        user_id = user.id,
+        order_status = "pending",
+        username = order.username,
+        email = order.email,
+        address = order.address,
+        contactnumber = order.contactnumber,
+        city = order.city,
+        total_price= order_total
+    )
+    Kafka_order = order_pb2.Order(order_id = order_data.order_id, username= order_data.username, useremail = order_data.email)
     serialized_order = Kafka_order.SerializeToString()
-    await producer.send_and_wait(setting.KAFKA_ORDER_TOPIC,serialized_order)
-    session.add(order_data)
-    session.commit()
-    session.refresh(order_data)
-    carts:Cart = service_get_cart_from_user(session,user)
+    await producer.send_and_wait(setting.KAFKA_ORDER_TOPIC, serialized_order)
     for cart in carts:
         service_create_order_item(session, user, cart, order_data.order_id)
         session.delete(cart)
         session.commit()  
+    session.add(order_data)
+    session.commit()
+    session.refresh(order_data)
     return order_data 
 
+def service_create_order_item(session: Session, user: User, order_item_data: Cart, order_id: int) -> OrderItem:
+    """
+    This function is used to create an order item.
+    Args:
+        session (Session): The database session.
+        user (User): The user object.
+        order_item_data (Cart): The cart data.
+        order_id (int): The id of the order.
+    Returns:
+        OrderItem: The order item object.
+    """
+    orderitem = OrderItem(
+        order_id = order_id,
+        product_id = order_item_data.product_id, 
+        price = order_item_data.product_total,
+        user_id = user.id,
+        quantity = order_item_data.quantity
+    )
+    session.add(orderitem)
+    session.commit()
+    session.refresh(orderitem)
+    return orderitem
+
+def service_delete_order_item(session: Session, order_id: int):
+    orderitems = session.exec(select(OrderItem).where(OrderItem.order_id == order_id)).all()
+    for orderitem in orderitems:
+        session.delete(orderitem)
+    session.commit()
+    return {"message":"Order item deleted!"}
 
 def service_delete_order(session: Session, order_id: int, user: User):
     """
@@ -119,12 +133,15 @@ def service_delete_order(session: Session, order_id: int, user: User):
         session (Session): The database session.
         order_id (int): The id of the order to delete.
     Returns:
-        dict: The response message.
+        Order: The order object.
     """
-    order = service_get_order_by_id(session, order_id,user)  
-    session.delete(order)
+    order = service_get_order_by_id(session, order_id, user) 
+    order.order_status = "cancelled"
+    session.add(order)
     session.commit()
-    return {"message":"order deleted"}
+    session.refresh(order)
+    service_delete_order_item(session, order_id)
+    return order
 
 def service_get_order_item(db: Session, order_id: int, user: User) -> List[OrderItem]:
     """
@@ -215,9 +232,9 @@ def service_add_to_cart(session: Session, cart_data: CartCreate, user: User) -> 
     Returns:
         Cart: The cart object.
     """
-    inventory = session.exec(select(Inventory).where(Inventory.product_id == cart_data.product_id)).first()
-    if cart_data.quantity > inventory.quantity:
-        raise HTTPException(status_code=200,detail="We are out of stock!")
+    inventory = service_check_inventory(session, cart_data)
+    if inventory:
+        service_update_inventory(session, cart_data)
     product: Product = get_product(cart_data.product_id)
     product_total = cart_data.quantity * product.price
     user_cart = Cart(user_id=user.id, product_id=cart_data.product_id, quantity=cart_data.quantity, product_total= product_total)
@@ -228,6 +245,52 @@ def service_add_to_cart(session: Session, cart_data: CartCreate, user: User) -> 
     session.commit()
     session.refresh(user_cart)
     return user_cart
+
+def service_check_inventory(session: Session, cart_data: CartCreate) -> Inventory:
+    """
+    This function is used to check the inventory of a product.
+    Args:
+        session (Session): The database session.
+        cart_data (CartCreate): The cart data.
+    Returns:
+        Inventory: The inventory object.
+    """
+    inventory = session.exec(select(Inventory).where(Inventory.product_id == cart_data.product_id)).first()
+    if inventory.quantity < cart_data.quantity:
+        raise HTTPException(status_code=200, detail="We are out of stock!")
+    return True
+
+def service_update_inventory(session: Session, cart_data: CartCreate) -> Inventory:
+    """
+    This function is used to update the inventory of a product.
+    Args:
+        session (Session): The database session.
+        cart_data (CartCreate): The cart data.
+    Returns:
+        Inventory: The inventory object.
+    """
+    inventory = session.exec(select(Inventory).where(Inventory.product_id == cart_data.product_id)).first()
+    inventory.quantity -= cart_data.quantity
+    session.add(inventory)
+    session.commit()
+    session.refresh(inventory)
+    return inventory
+
+def service_revert_inventory(session: Session, cart_data: CartCreate) -> Inventory:
+    """
+    This function is used to revert the inventory of a product.
+    Args:
+        session (Session): The database session.
+        cart_data (CartCreate): The cart data.
+    Returns:
+        Inventory: The inventory object.
+    """
+    inventory = session.exec(select(Inventory).where(Inventory.product_id == cart_data.product_id)).first()
+    inventory.quantity += cart_data.quantity
+    session.add(inventory)
+    session.commit()
+    session.refresh(inventory)
+    return inventory
 
 def service_remove_cart_by_id(db: Session, user: User, cart_id: int) -> Cart:
     """
@@ -246,20 +309,6 @@ def service_remove_cart_by_id(db: Session, user: User, cart_id: int) -> Cart:
     db.commit()
     db.refresh(cart)
     return cart
-
-def service_remove_cart(db: Session, user: User):
-    """
-    This function is used to remove all carts.
-    Args:
-        db (Session): The database session.
-        user (User): The user object.
-    """
-    carts = db.exec(select(Cart).where(Cart.user_id == user.id)).all()
-    for cart in carts:
-        db.delete(cart)
-    db.commit()
-    db.refresh(cart)
-    return {"message":"All carts are removed!"}
      
 def service_update_cart_add(db: Session, cart_id: int, user: User, product_id: int) -> Cart:
     """
@@ -277,6 +326,9 @@ def service_update_cart_add(db: Session, cart_id: int, user: User, product_id: i
     if cart is None:
         raise HTTPException(status_code=404, detail="Cart not found!")
     cart.quantity +=1
+    inventory = service_check_inventory(db, cart.quantity)
+    if inventory:
+        service_update_inventory(db, cart.quantity)
     cart.product_total = cart.quantity * product.price
     return cart
 
@@ -296,6 +348,9 @@ def service_update_cart_minus(db: Session, cart_id: int, user: User, product_id:
     if cart is None:
         raise HTTPException(status_code=404, detail="Cart not found!")
     cart.quantity -=1
+    inventory = service_check_inventory(db, cart.quantity)
+    if inventory:
+        service_revert_inventory(db, cart.quantity)
     cart.product_total = cart.quantity * product.price
     return cart
 
@@ -308,7 +363,7 @@ def service_get_cart_by_id(db: Session, cart_id: int, user: User) -> Cart:
     Returns:
         Cart: The cart object.
     """
-    cart = db.exec(select(Cart).where(Cart.cart_id == cart_id,Cart.user_id == user.id)).first()
+    cart = db.exec(select(Cart).where(Cart.cart_id == cart_id, Cart.user_id == user.id)).first()
     return cart
 
 def service_get_product_from_cart(db: Session, user: User, cart_id: int) -> List[Product]:

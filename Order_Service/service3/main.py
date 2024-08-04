@@ -79,8 +79,8 @@ def update_cart_add(cart_id: int, cart_data: CartUpdate, db: Annotated[Session, 
     return updated_cart
 
 @app.patch("/cart/product/minus", response_model = Cart, tags=["Cart"])
-def update_cart_minus(cart_id: int, product_id: int, db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(get_current_user)]):
-    updated_cart = service_update_cart_minus(db, cart_id, user, product_id)
+def update_cart_minus(cart_id: int, cart_data: CartUpdate, db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(get_current_user)]):
+    updated_cart = service_update_cart_minus(db, cart_id, user, cart_data)
     return updated_cart
 
 @app.delete("/cart/remove/{cart_id}", tags=["Cart"])

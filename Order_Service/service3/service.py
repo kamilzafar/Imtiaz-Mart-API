@@ -256,7 +256,7 @@ def service_check_inventory(session: Session, cart_data: CartCreate) -> Inventor
         Inventory: The inventory object.
     """
     inventory = session.exec(select(Inventory).where(Inventory.product_id == cart_data.product_id)).first()
-    if inventory.quantity < cart_data.quantity:
+    if inventory.quantity <= cart_data.quantity:
         raise HTTPException(status_code=200, detail="We are out of stock!")
     return True
 
@@ -310,7 +310,7 @@ def service_remove_cart_by_id(db: Session, user: User, cart_id: int) -> Cart:
     db.refresh(cart)
     return cart
      
-def service_update_cart_add(db: Session, cart_id: int, user: User, product_id: int) -> Cart:
+def service_update_cart_add(db: Session, cart_id: int, user: User, cart_data: CartUpdate) -> Cart:
     """
     This function is used to update the quantity of a product in the cart.
     Args:
@@ -322,17 +322,17 @@ def service_update_cart_add(db: Session, cart_id: int, user: User, product_id: i
         Cart: The cart object.
     """
     cart = db.exec(select(Cart).where(Cart.cart_id == cart_id, Cart.user_id == user.id)).first()
-    product: Product = get_product(product_id)
+    product: Product = get_product(cart_data.product_id)
     if cart is None:
         raise HTTPException(status_code=404, detail="Cart not found!")
     cart.quantity +=1
-    inventory = service_check_inventory(db, cart.quantity)
+    inventory = service_check_inventory(db, cart_data)
     if inventory:
-        service_update_inventory(db, cart.quantity)
+        service_update_inventory(db, cart_data)
     cart.product_total = cart.quantity * product.price
     return cart
 
-def service_update_cart_minus(db: Session, cart_id: int, user: User, product_id: int) -> Cart:
+def service_update_cart_minus(db: Session, cart_id: int, user: User, cart_data: CartUpdate) -> Cart:
     """
     This function is used to update the quantity of a product in the cart.
     Args:
@@ -343,14 +343,14 @@ def service_update_cart_minus(db: Session, cart_id: int, user: User, product_id:
     Returns:
         Cart: The cart object.
     """
-    cart = db.exec(select(Cart).where(Cart.cart_id == cart_id,Cart.user_id == user.id)).first()
-    product: Product = get_product(product_id) 
+    cart = db.exec(select(Cart).where(Cart.cart_id == cart_id, Cart.user_id == user.id)).first()
+    product: Product = get_product(cart_data.product_id) 
     if cart is None:
         raise HTTPException(status_code=404, detail="Cart not found!")
     cart.quantity -=1
-    inventory = service_check_inventory(db, cart.quantity)
+    inventory = service_check_inventory(db, cart_data)
     if inventory:
-        service_revert_inventory(db, cart.quantity)
+        service_revert_inventory(db, cart_data)
     cart.product_total = cart.quantity * product.price
     return cart
 

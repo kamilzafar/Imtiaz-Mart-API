@@ -25,8 +25,8 @@ app = FastAPI(
 def main():
     return {"service" : "Inventory service"}
 
-@app.get("/check", tags=["Inventory"])
-def get_inventory(product_id: int, db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
+@app.get("/check/{product_id}", tags=["Inventory"])
+def get_inventory(product_id: int, db: Annotated[Session, Depends(db_session)]):
     invetory = service_get_inventory(db, product_id)
     return invetory
 
@@ -37,8 +37,12 @@ def create_inventory(db: Annotated[Session, Depends(db_session)], user: Annotate
     return inventory
 
 @app.patch("/update", response_model = Inventory, tags=["Inventory"])
-def update_inventory(db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)], inventory_data: InventoryUpdate):
+def update_inventory(db: Annotated[Session, Depends(db_session)], inventory_data: InventoryUpdate):
     return service_update_inventory(db, inventory_data)
+
+@app.delete("/product", tags=["Inventory"])
+def remove_product_quantity(db: Annotated[Session, Depends(db_session)], inventory: InventoryUpdate):
+    return service_reverse_inventory(db, inventory)
 
 @app.delete("/delete", tags=["Inventory"])
 def delete_inventory_by_id(db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)], inventory: InventoryDelete):

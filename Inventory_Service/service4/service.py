@@ -113,6 +113,26 @@ def service_update_inventory(db: Session, inventory_update: InventoryUpdate) -> 
     db.refresh(inventory)
     return inventory
 
+def service_reverse_inventory(db: Session, inventory_update: InventoryUpdate) -> Inventory:
+    """
+    This function is used to reverse inventory.
+    Args:
+        db (Session): The database session.
+        inventory_update (InventoryUpdate): The inventory data.
+    Returns:
+        dict: The inventory object.
+    """
+    inventory = db.exec(select(Inventory).where(Inventory.product_id == inventory_update.product_id)).first()
+    if inventory is None:
+        raise HTTPException(status_code=404,detail= "Not Found")
+    if inventory.quantity < inventory_update.quantity:
+        raise HTTPException(status_code=400,detail= "Not enough quantity")
+    inventory.quantity -= inventory_update.quantity
+    db.add(inventory)
+    db.commit()
+    db.refresh(inventory)
+    return inventory
+
 def service_delete_inventory_by_id(db: Session, inventory: InventoryDelete):
     """
     This function is used to delete inventory.

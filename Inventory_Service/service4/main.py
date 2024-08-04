@@ -21,34 +21,25 @@ app = FastAPI(
     root_path="/inventory"
 )
 
-@app.get("/")
+@app.get("/", tags=["Root"])
 def main():
-    return {"service":"Inventory service"}
+    return {"service" : "Inventory service"}
 
-
-@app.get("/get-inventory")
-def get_inventory(db:Annotated[Session,Depends(db_session)],user:Annotated[User,Depends(get_current_user)]):
-    invetory = service_get_inventory(db,user)
+@app.get("/check", tags=["Inventory"])
+def get_inventory(product_id: int, db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
+    invetory = service_get_inventory(db, product_id)
     return invetory
 
-@app.get("/getproduct",response_model=Product)
-def get_product_by_inventory(db:Annotated[Session,Depends(db_session)],user:Annotated[User,Depends(get_current_user)],inventory_id:int):
-    return service_get_product_from_inventory(db,user,inventory_id)
-
-@app.post("/create-inventory",response_model=InventoryRead)
-def create_inventory(db:Annotated[Session,Depends(db_session)],user:Annotated[User,Depends(get_current_user)],inventory_data:InventoryCreate):
+@app.post("/create", response_model=Inventory, tags=["Inventory"])
+def create_inventory(db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)], inventory_data: InventoryCreate):
     inventory_info= Inventory.model_validate(inventory_data)
-    inventory = service_create_inventory(db,inventory_info,user)
+    inventory = service_create_inventory(db, inventory_info)
     return inventory
 
-@app.patch("/update-inventory")
-def update_inventory(db:Annotated[Session,Depends(db_session)],user:Annotated[User,Depends(get_current_user)],inventory_data:InventoryUpdate,inventory_id:int):
-    return service_update_inventory(db,user,inventory_data,inventory_id)
+@app.patch("/update", response_model = Inventory, tags=["Inventory"])
+def update_inventory(db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)], inventory_data: InventoryUpdate):
+    return service_update_inventory(db, inventory_data)
 
-@app.delete("/delete-inventory")
-def delete_inventory(db:Annotated[Session,Depends(db_session)],user:Annotated[User,Depends(get_current_user)]):
-    return service_delete_inventory(db,user)
-
-@app.delete("/delete-inventory/{inventory_id}")
-def delete_inventory_by_id(db:Annotated[Session,Depends(db_session)],user:Annotated[User,Depends(get_current_user)],inventory_id:int):
-    return service_delete_inventory_by_id(db,user,inventory_id)
+@app.delete("/delete", tags=["Inventory"])
+def delete_inventory_by_id(db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)], inventory: InventoryDelete):
+    return service_delete_inventory_by_id(db, inventory)

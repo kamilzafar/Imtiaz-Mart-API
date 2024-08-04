@@ -77,12 +77,6 @@ class CartRead(CartBase):
     user_id: UUID
     product_id: int
 
-class Image(SQLModel):
-    id: Optional[int] = Field(default=None, primary_key=True, index=True)
-    filename: str
-    content_type: str
-    image_data: bytes
-
 class Category(str, Enum):
     electronics = "electronics"
     clothing = "clothing"
@@ -122,6 +116,3 @@ class InventoryCreate(InventoryBase):
 
 class InventoryUpdate(SQLModel): 
    pass
-
-class InventoryRead(InventoryBase): 
-    pass

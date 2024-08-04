@@ -110,18 +110,18 @@ class ProductUpdate(ProductBase):
     pass
 
 class InventoryBase(SQLModel):
-    inventory_name: str
+    product_id: int
     quantity: int 
 
 class Inventory(InventoryBase, table=True):
     inventory_id: int = Field(primary_key=True,default=None)
-    product_id: int
+    inventory_name: str
 
 class InventoryCreate(InventoryBase): 
-    product_id: int
+    pass
 
 class InventoryUpdate(SQLModel): 
-    quantity: int 
+   pass
 
 class InventoryRead(InventoryBase): 
     pass

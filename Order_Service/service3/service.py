@@ -232,9 +232,9 @@ def service_add_to_cart(session: Session, cart_data: CartCreate, user: User) -> 
     Returns:
         Cart: The cart object.
     """
-    inventory = service_check_inventory(session, cart_data)
+    inventory = service_check_inventory(cart_data)
     if inventory:
-        service_update_inventory(session, cart_data)
+        service_update_inventory(cart_data)
     product: Product = get_product(cart_data.product_id)
     product_total = cart_data.quantity * product.price
     user_cart = Cart(user_id=user.id, product_id=cart_data.product_id, quantity=cart_data.quantity, product_total= product_total)
@@ -246,7 +246,7 @@ def service_add_to_cart(session: Session, cart_data: CartCreate, user: User) -> 
     session.refresh(user_cart)
     return user_cart
 
-def service_check_inventory(session: Session, cart_data: CartCreate) -> Inventory:
+def service_check_inventory(cart_data: CartCreate) -> Inventory:
     """
     This function is used to check the inventory of a product.
     Args:
@@ -255,12 +255,15 @@ def service_check_inventory(session: Session, cart_data: CartCreate) -> Inventor
     Returns:
         Inventory: The inventory object.
     """
-    inventory = session.exec(select(Inventory).where(Inventory.product_id == cart_data.product_id)).first()
+    inventory = requests.get(f"{setting.INVENTORY_SERVICE_URL}/inventory/check/{cart_data.product_id}")
+    if inventory.status_code != 200:
+        raise HTTPException(status_code=404, detail="Inventory not found!")
+    inventory = Inventory(**inventory.json())
     if inventory.quantity <= cart_data.quantity:
         raise HTTPException(status_code=200, detail="We are out of stock!")
     return True
 
-def service_update_inventory(session: Session, cart_data: CartCreate) -> Inventory:
+def service_update_inventory(cart_data: CartCreate) -> Inventory:
     """
     This function is used to update the inventory of a product.
     Args:
@@ -269,27 +272,31 @@ def service_update_inventory(session: Session, cart_data: CartCreate) -> Invento
     Returns:
         Inventory: The inventory object.
     """
-    inventory = session.exec(select(Inventory).where(Inventory.product_id == cart_data.product_id)).first()
-    inventory.quantity -= cart_data.quantity
-    session.add(inventory)
-    session.commit()
-    session.refresh(inventory)
+    inventory = requests.patch(
+        f"{setting.INVENTORY_SERVICE_URL}/inventory/update",
+        json={"product_id": cart_data.product_id, "quantity": cart_data.quantity}
+        )
+    if inventory.status_code != 200:
+        raise HTTPException(status_code=404, detail="Inventory not found!")
+    inventory = Inventory(**inventory.json())
     return inventory
 
-def service_revert_inventory(session: Session, cart_data: CartCreate) -> Inventory:
+def service_reverse_inventory(cart_data: CartUpdate) -> Inventory:
     """
-    This function is used to revert the inventory of a product.
+    This function is used to reverse the inventory of a product.
     Args:
         session (Session): The database session.
-        cart_data (CartCreate): The cart data.
+        cart_data (CartUpdate): The cart data.
     Returns:
         Inventory: The inventory object.
     """
-    inventory = session.exec(select(Inventory).where(Inventory.product_id == cart_data.product_id)).first()
-    inventory.quantity += cart_data.quantity
-    session.add(inventory)
-    session.commit()
-    session.refresh(inventory)
+    inventory = requests.delete(
+        f"{setting.INVENTORY_SERVICE_URL}/inventory/product", 
+        json={"product_id": cart_data.product_id, "quantity": cart_data.quantity}
+    )
+    if inventory.status_code != 200:
+        raise HTTPException(status_code=404, detail="Inventory not found!")
+    inventory = Inventory(**inventory.json())
     return inventory
 
 def service_remove_cart_by_id(db: Session, user: User, cart_id: int) -> Cart:
@@ -325,10 +332,10 @@ def service_update_cart_add(db: Session, cart_id: int, user: User, cart_data: Ca
     product: Product = get_product(cart_data.product_id)
     if cart is None:
         raise HTTPException(status_code=404, detail="Cart not found!")
-    cart.quantity +=1
-    inventory = service_check_inventory(db, cart_data)
+    cart.quantity += cart_data.quantity
+    inventory = service_check_inventory(cart_data)
     if inventory:
-        service_update_inventory(db, cart_data)
+        service_update_inventory(cart_data)
     cart.product_total = cart.quantity * product.price
     return cart
 
@@ -347,10 +354,10 @@ def service_update_cart_minus(db: Session, cart_id: int, user: User, cart_data: 
     product: Product = get_product(cart_data.product_id) 
     if cart is None:
         raise HTTPException(status_code=404, detail="Cart not found!")
-    cart.quantity -=1
-    inventory = service_check_inventory(db, cart_data)
+    cart.quantity -= cart_data.quantity
+    inventory = service_check_inventory(cart_data)
     if inventory:
-        service_revert_inventory(db, cart_data)
+        service_reverse_inventory(cart_data)
     cart.product_total = cart.quantity * product.price
     return cart
 

@@ -31,7 +31,7 @@ class OrderUpdate(OrderBase):
 class OrderRead(OrderBase):
     pass
 
-class OrderItem(SQLModel,table =True):
+class OrderItem(SQLModel, table = True):
     id: int = Field(primary_key=True,default=None)
     order_id: int 
     user_id: UUID 
@@ -107,7 +107,7 @@ class InventoryBase(SQLModel):
     product_id: int
     quantity: int 
 
-class Inventory(InventoryBase, table=True):
+class Inventory(InventoryBase):
     inventory_id: int = Field(primary_key=True,default=None)
     inventory_name: str
 

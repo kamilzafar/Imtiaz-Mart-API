@@ -12,7 +12,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 @app.get("/", tags=["Root"])
 def get_root():
-    return {"service6": "Payment Service"}
+    return {"service": "Payment Service"}
 
 @app.get("/process", tags=["Payment"])
 def process_payment(token: str = Depends(oauth2_scheme)):

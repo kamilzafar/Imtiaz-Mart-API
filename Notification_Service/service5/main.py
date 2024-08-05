@@ -42,7 +42,7 @@ app = FastAPI(
 
 @app.get("/", tags=["Root"])
 def read_root():
-    return {"Service": "Notification Service"}
+    return {"service": "Notification Service"}
 
 @app.post("/send_mail")
 async def send_mail(email: EmailSchema):

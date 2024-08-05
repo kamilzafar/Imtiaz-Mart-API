@@ -1,16 +1,13 @@
-import random
 from jose import jwt
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
 from service1.settings import *
-from service1.models import *
+from service1.models.user_models import *
 from datetime import datetime, timedelta, timezone
 from sqlmodel import Session, select
 from fastapi import HTTPException, status
 from pydantic import EmailStr
 from typing import Union, Any
-import requests
-import json
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -145,64 +142,3 @@ def create_refresh_token(data: Union[str, Any], expires_delta: int = None) -> st
     to_encode = {"exp": expires_delta, "sub": str(data)}
     encoded_jwt = jwt.encode(to_encode, JWT_REFRESH_SECRET_KEY, ALGORITHM)
     return encoded_jwt
-
-def add_consumer_to_kong(username: str):
-    """
-    Add a consumer to Kong.
-    Args:
-        username (str): The username of the consumer.
-    Returns:
-        dict: The response from Kong.
-    """
-    url = f"{KONG_ADMIN_URL}/consumers/{username}"
-    response = requests.get(url)
-
-    if response.status_code == 200:
-        # Consumer with the given username already exists, return it
-        return response.json()
-    
-    url = f"{KONG_ADMIN_URL}/consumers"
-    random_number = random.randint(10000, 99999)
-    data = {"username": username, "custom_id": f"{random_number}"}
-    headers = {"Content-Type": "application/json"}
-    response = requests.post(url,  data=json.dumps(data), headers=headers)
-
-    if response.status_code != 201:
-        raise HTTPException(status_code=500, detail="Failed to create consumer in Kong")
-
-    consumer = response.json()
-
-    # url = f"{KONG_ADMIN_URL}/consumers/{consumer['id']}/jwt"
-    # jwt_data = {
-    #     "algorithm": ALGORITHM,
-    #     "key": "sub",
-    #     "secret": SECRET_KEY
-    # }
-    # jwt_headers = {"Content-Type": "application/json"}
-    # jwt_response = requests.post(url, json.dumps(jwt_data), headers=jwt_headers)
-
-    # if jwt_response.status_code != 201:
-    #     print(f"Failed to create JWT credential: {jwt_response.status_code} {jwt_response.text}")
-    #     raise HTTPException(status_code=500, detail="Failed to create JWT credential for consumer")
-
-    # jwt_credential = jwt_response.json()
-
-    # consumer['jwt'] = jwt_credential
-    return consumer
-
-def delete_consumer_from_kong(username: str):
-    """
-    Delete a consumer from Kong.
-    Args:
-        username (str): The username of the consumer.
-    Returns:
-        dict: The response from Kong.
-    """
-    url = f"{KONG_ADMIN_URL}/consumers/{username}"
-    headers = {"Content-Type": "application/json"}
-    response = requests.delete(url, headers=headers)
-
-    if response.status_code != 204:
-        raise HTTPException(status_code=500, detail="Failed to delete consumer from Kong")
-
-    return {"message": "Consumer deleted successfully"}

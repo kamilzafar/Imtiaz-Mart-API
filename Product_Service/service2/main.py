@@ -5,7 +5,7 @@ from service2.models.user_models import User
 from service2.models.product_models import Product, ProductCreate
 from service2.crud.product_crud import create_product, get_all_products, get_product_by_id, get_product_by_name, delete_product
 from sqlmodel import Session
-from service2.databse.db import db_session, lifespan
+from service2.database.db import db_session, lifespan
 
 app = FastAPI(
     title="Product Service",

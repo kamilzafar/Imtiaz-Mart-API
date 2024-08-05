@@ -1,13 +1,13 @@
 from aiokafka import AIOKafkaProducer
-from fastapi import FastAPI, Depends, HTTPException, status
+from fastapi import FastAPI, Depends, HTTPException
 from sqlmodel import select, Session
 from typing import Annotated
-from datetime import timedelta
 from fastapi.security import OAuth2PasswordRequestForm
-from service1.curd import produce_message, signup_user, get_current_user, get_user_by_username, verify_password, check_admin
-from service1.db import *
+from service1.kafka.producer import produce_message
+from service1.crud.user_crud import user_login, update_user, delete_user, signup_user, signup_user, get_current_user, check_admin
+from service1.database.db import *
 from service1.services import *
-from service1.models import *
+from service1.models.user_models import *
 
 app = FastAPI(
     title="User Service", 
@@ -21,65 +21,32 @@ app = FastAPI(
 def read_root():
     return {"service": "User Service"}
 
-@app.post("/login", response_model=Token, tags=["Users"])
+@app.post("/login", response_model=Token, tags=["User"])
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Annotated[Session, Depends(db_session)]) -> Token:
-    user: Userlogin = get_user_by_username(db, form_data.username)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    if not verify_password(form_data.password, user.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    refresh_token_expires = timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
-    refresh_token = create_access_token(
-        data={"sub": user.username}, expires_delta=refresh_token_expires
-    )
-    return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": access_token_expires+refresh_token_expires, "token_type": "bearer"}
+    user = user_login(db, form_data)
+    return user
 
-@app.post("/signup", response_model=User, tags=["Users"])
+@app.post("/signup", response_model=User, tags=["User"])
 async def signup(db: Annotated[Session, Depends(db_session)], user: UserCreate, producer: Annotated[AIOKafkaProducer, Depends(produce_message)]):
     try:
         return await signup_user(user, db, producer)
     except Exception as e:
         raise HTTPException(status_code=400,detail=str(e))
 
-@app.get("/users/me", response_model=User, tags=["Users"])
+@app.get("/users/me", response_model=User, tags=["User"])
 async def read_users_me(token: Annotated[str, Depends(oauth2_scheme)], db: Annotated[Session, Depends(db_session)]) -> User:
     user = await get_current_user(token, db)
     return user
 
-@app.patch("/user", response_model=User, tags=["Users"])
+@app.patch("/update-user", response_model=User, tags=["User"])
 def update_user(user: UserUpdate, session: Annotated[Session, Depends(db_session)], current_user: Annotated[User, Depends(get_current_user)]) -> User:
-    updated_user = session.exec(select(User).where(User.id == current_user.id)).first()
-    if not updated_user:
-        raise HTTPException(status_code=404, detail="User not found")
-    update_data = user.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        value = value if key != "password" else pwd_context.hash(value)
-        setattr(updated_user, key, value)
-    session.commit()
-    session.refresh(updated_user)
+    updated_user = update_user(user, session, current_user)
     return updated_user
 
-@app.delete("/user/{username}", response_model=User, tags=["Admin"])
-def delete_user(session: Annotated[Session, Depends(db_session)], username: str, current_user: Annotated[User, Depends(check_admin)]) -> User:
-    user = session.exec(select(User).where(User.username == username)).first()
-    if not user:
-        raise HTTPException(status_code=404, detail="User not found")
-    delete_consumer_from_kong(username)
-    session.delete(user)
-    session.commit()
-    return {username: "deleted"}
+@app.delete("/delete-user", response_model=User, tags=["User"])
+def user_delete(session: Annotated[Session, Depends(db_session)], current_user: Annotated[User, Depends(get_current_user)]):
+    delete_user(session, current_user.username)
+    return {"message": "User deleted successfully"}
 
 @app.get("/users", response_model=list[User], tags=["Admin"])
 def read_users(db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]) -> list[User]:

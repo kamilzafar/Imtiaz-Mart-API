@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from sqlmodel import SQLModel, create_engine, Session, select
+from sqlmodel import SQLModel, create_engine, Session
 from fastapi import FastAPI
 from service1 import settings
 

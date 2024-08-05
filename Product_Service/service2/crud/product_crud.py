@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from sqlmodel import Session, select
-from service2.models import Product, ProductCreate, User
+from service2.models.product_models import Product, ProductCreate
+from service2.models.user_models import User
 
 def create_product(session: Session, product: ProductCreate, user: User) -> Product:
     """

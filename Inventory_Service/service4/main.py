@@ -3,9 +3,11 @@ from contextlib import asynccontextmanager
 from typing import Annotated
 from sqlmodel import Session
 from fastapi import FastAPI
-from service4.models import *
-from service4.service import *
-from service4.database import *
+from service4.crud.inventory_crud import service_get_inventory, service_create_inventory, service_update_inventory, service_reverse_inventory, service_delete_inventory_by_id
+from service4.database.database import create_db_and_tables, db_session
+from service4.models.inventory_model import Inventory, InventoryCreate, InventoryUpdate, InventoryDelete
+from service4.models.user_model import User
+from service4.service import check_admin
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

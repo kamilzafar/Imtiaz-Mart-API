@@ -1,28 +1,12 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from service5.db import create_db_and_tables
+from service5.database.db import create_db_and_tables
 import asyncio
-from service5.services import user_consumer_task, order_consumer_task
-from service5 import settings
-from fastapi_mail import FastMail, MessageSchema,ConnectionConfig
+from service5.kafka.consumers import user_consumer_task, order_consumer_task
+from fastapi_mail import FastMail, MessageSchema
 from starlette.responses import JSONResponse
-from pydantic import EmailStr, BaseModel
-from typing import List
-
-class EmailSchema(BaseModel):
-   email: List[EmailStr]
-
-conf = ConnectionConfig(
-    MAIL_USERNAME=settings.smtp_email,
-    MAIL_PASSWORD= settings.SMTP_PASSWORD,
-    MAIL_PORT=465,
-    MAIL_SERVER=settings.smtp_server,
-    MAIL_STARTTLS = False,
-    MAIL_SSL_TLS = True,
-    USE_CREDENTIALS = True,
-    VALIDATE_CERTS = True,
-    MAIL_FROM=settings.smtp_email
-)
+from service5.models.email_model import EmailSchema
+from service5.services import conf
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -44,7 +28,7 @@ app = FastAPI(
 def read_root():
     return {"service": "Notification Service"}
 
-@app.post("/send_mail")
+@app.post("/send_mail", tags=["Email"])
 async def send_mail(email: EmailSchema):
 
     body = f"Hi! ,\n\nYour order has been placed successfully!\n\nBest regards,\nKR Mart Team"

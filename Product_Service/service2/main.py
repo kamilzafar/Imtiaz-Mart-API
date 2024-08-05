@@ -1,11 +1,11 @@
-from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi import FastAPI, Depends
 from typing import Annotated, List
 from service2.services import check_admin
-from service2.models import User, Product, ProductCreate, Image
-from sqlmodel import Session, select
-import io
-from service2.db import db_session, lifespan
+from service2.models.user_models import User
+from service2.models.product_models import Product, ProductCreate
+from service2.crud.product_crud import create_product, get_all_products, get_product_by_id, get_product_by_name, delete_product
+from sqlmodel import Session
+from service2.databse.db import db_session, lifespan
 
 app = FastAPI(
     title="Product Service",
@@ -17,78 +17,30 @@ app = FastAPI(
 
 @app.get("/", tags=["Root"])
 def read_root():
-    return {"Service2": "Product Service"}
-
-@app.post("/upload-file", tags=["Image"])
-async def get_file(file: Annotated[UploadFile, File(title="Product Image")], session: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
-    if file.content_type.startswith("image/"):
-        try:
-            image_data = await file.read()
-            image = Image(
-                filename=file.filename,
-                content_type=file.content_type,
-                image_data=image_data
-            )
-            session.add(image)
-            session.commit()
-            session.refresh(image)
-            return {"id": image.id, "filename": image.filename}
-        except Exception as e:
-            raise HTTPException(status_code=500, detail="An error occurred while saving the image.")
-    else:
-        raise HTTPException(status_code=400, detail="Invalid file type. Only images are allowed.")
-
-@app.get("/images/{image_id}", tags=["Image"])
-def read_image(image_id: int, session: Annotated[Session, Depends(db_session)]):
-    image = session.get(Image, image_id)
-    if not image:
-        raise HTTPException(status_code=404, detail="Image not found")
-    
-    return StreamingResponse(io.BytesIO(image.image_data), media_type=image.content_type)
+    return {"service": "Product Service"}
 
 @app.post("/create", response_model=Product, tags=["Product"])
 def create_product(product: ProductCreate, session: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
-    product_image = session.get(Image, product.image_id)
-    if not product_image:
-        raise HTTPException(status_code=400, detail="Image not found")
-    if user:
-        product = Product(**product.model_dump(),user_id=user.id)
-        session.add(product)
-        session.commit()
-        session.refresh(product)
-        return product
+    new_product = create_product(session, product, user)
+    return new_product
 
-@app.get("/products", response_model=List[Product], tags=["Product"])
-def read_products(session: Annotated[Session, Depends(db_session)], skip: int = 0, limit: int = 10):
-    products = session.exec(select(Product).offset(skip).limit(limit)).all()
+@app.get("/all-products", response_model=List[Product], tags=["Product"])
+def read_products(session: Annotated[Session, Depends(db_session)]):
+    products = get_all_products(session)
     return products
 
 @app.get("/search", response_model=List[Product], tags=["Product"])
 def get_product_by_name(product_name: str, session: Annotated[Session, Depends(db_session)]):
-    product = session.exec(select(Product).where(Product.name.contains(product_name))).all()
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+    product = get_product_by_name(session, product_name)
     return product
 
 @app.get("/{product_id}", response_model=Product, tags=["Product"])
 def read_product_by_id(product_id: int, session: Annotated[Session, Depends(db_session)]):
-    product = session.get(Product, product_id)
-    # product = session.exec(select(Product).where(Product.id == product_id)).first()
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
+    product = get_product_by_id(session, product_id)
     return product
 
 @app.delete("/delete", tags=["Product"])
 def delete_product(product_id: int, session: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
-    product = session.get(Product, product_id)
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    image = session.exec(select(Image).where(Image.id == product.image_id)).first()
-    if not image:
-        raise HTTPException(status_code=404, detail="Image not found")
-    session.delete(product)
-    session.commit()
-    session.delete(image)
-    session.commit()
-    return {"message": "Product deleted successfully."}
+    product = delete_product(session, product_id)
+    return product
 

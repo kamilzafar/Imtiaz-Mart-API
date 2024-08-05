@@ -6,4 +6,4 @@ except FileNotFoundError:
     config = Config()
 
 DATABASE_URL = config("DATABASE_URL", cast=str)
-BACKEND_URL = config("BACKEND_URL", cast=str)
+USER_SERVICE_URL = config("USER_SERVICE_URL", cast=str)

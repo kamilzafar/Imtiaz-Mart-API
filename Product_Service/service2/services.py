@@ -1,9 +1,9 @@
-from typing import Annotated
 from fastapi import Depends, HTTPException, status
-from service2.models import User
+from service2.models.user_models import User
 from fastapi.security import OAuth2PasswordBearer
+from service2.settings import USER_SERVICE_URL
 import requests
-from service2.settings import BACKEND_URL
+from typing import Annotated
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
@@ -21,7 +21,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
-    response = requests.get(f"{BACKEND_URL}/auth/users/me", headers={"Authorization": f"Bearer {token}"})
+    response = requests.get(f"{USER_SERVICE_URL}/auth/users/me", headers={"Authorization": f"Bearer {token}"})
     user = User(**response.json())
     if user is None:
         raise credentials_exception

@@ -1,5 +1,8 @@
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
+from service6.db import create_db_and_tables
+from contextlib import asynccontextmanager
+from service6.service import *
 
 app = FastAPI(
     title="Payment Service",
@@ -8,12 +11,23 @@ app = FastAPI(
     root_path="/payment"
 )
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("Creating database connection")
+    create_db_and_tables()
+    yield
+
+oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+
 
 @app.get("/", tags=["Root"])
 def get_root():
     return {"service": "Payment Service"}
 
-@app.get("/process", tags=["Payment"])
-def process_payment(token: str = Depends(oauth2_scheme)):
-    return {"message": "Payment processed successfully"}
+
+
+@app.post("/payment")
+def process_payment(order_id:int):
+    payment = generate_checkout_session(order_id)
+    return payment
+

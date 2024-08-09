@@ -32,5 +32,5 @@ def service_get_order(order_id:int):
     Order = requests.get(f"{settings.ORDER_SERVICE_URL}/get/{order_id}")
     if Order.status_code != 200:
         raise HTTPException(status_code=404, detail="Inventory not found!")
-    inventory = Order(**inventory.json())
-    return Order
+    order = Order(**Order.json())
+    return order

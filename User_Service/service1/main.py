@@ -8,6 +8,8 @@ from service1.crud.user_crud import user_login, update_user, delete_user, signup
 from service1.database.db import *
 from service1.services import *
 from service1.models.user_models import *
+from fastapi.middleware.cors import CORSMiddleware
+from service1.settings import ORDER_SERVICE_URL, INVENTORY_SERVICE_URL, PRODUCT_SERVICE_URL, NOTIFICATION_SERVICE_URL, PAYMENT_SERVICE_URL
 
 app = FastAPI(
     title="User Service", 
@@ -16,6 +18,22 @@ app = FastAPI(
     lifespan=lifespan,
     root_path="/auth"
     )
+
+origins = [
+    ORDER_SERVICE_URL,
+    INVENTORY_SERVICE_URL,
+    PRODUCT_SERVICE_URL,
+    NOTIFICATION_SERVICE_URL,
+    PAYMENT_SERVICE_URL
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/", tags=["Root"])
 def read_root():

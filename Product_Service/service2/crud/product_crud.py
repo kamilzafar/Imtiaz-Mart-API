@@ -61,7 +61,7 @@ def get_product_by_name(session: Session, product_name: str) -> list[Product]:
         raise HTTPException(status_code=404, detail="Product not found")
     return products
 
-def delete_product(session: Session, product_id: int) -> dict:
+def delete_product_from_db(session: Session, product_id: int) -> dict:
     """
     Delete a product by its ID.
     Args:

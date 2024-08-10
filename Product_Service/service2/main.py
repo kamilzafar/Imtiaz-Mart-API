@@ -3,9 +3,11 @@ from typing import Annotated, List
 from service2.services import check_admin
 from service2.models.user_models import User
 from service2.models.product_models import Product, ProductCreate
-from service2.crud.product_crud import create_product, get_all_products, get_product_by_id, get_product_by_name, delete_product
+from service2.crud.product_crud import create_product, get_all_products, get_product_by_id, get_product_by_name, delete_product_from_db
 from sqlmodel import Session
 from service2.database.db import db_session, lifespan
+from service2.settings import USER_SERVICE_URL, ORDER_SERVICE_URL, INVENTORY_SERVICE_URL
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Product Service",
@@ -13,6 +15,20 @@ app = FastAPI(
     version="0.1",
     lifespan=lifespan,
     root_path="/product",
+)
+
+origins = [
+    USER_SERVICE_URL,
+    ORDER_SERVICE_URL,
+    INVENTORY_SERVICE_URL
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.get("/", tags=["Root"])
@@ -41,6 +57,6 @@ def read_product_by_id(product_id: int, session: Annotated[Session, Depends(db_s
 
 @app.delete("/delete", tags=["Product"])
 def delete_product(product_id: int, session: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
-    product = delete_product(session, product_id)
+    product = delete_product_from_db(session, product_id)
     return product
 

@@ -72,8 +72,16 @@ jobs:
               PAYMENT_SERVICE_URL=${{ secrets.PAYMENT_SERVICE_URL }} \
               ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
               INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
-              NOTIFICATION_SERVICE_URL=${{ secrets.NOTIFICATION_SERVICE_URL }} \
-              CORS_URLS="${{ secrets.USER_SERVICE_URL }},${{ secrets.PRODUCT_SERVICE_URL }},${{ secrets.ORDER_SERVICE_URL }},${{ secrets.INVENTORY_SERVICE_URL }}"
+              NOTIFICATION_SERVICE_URL=${{ secrets.NOTIFICATION_SERVICE_URL }} 
+
+      # Configure CORS for the user service
+      - name: Configure CORS for User Service
+        run: |
+          az containerapp ingress cors add \
+            --name service1 \
+            --resource-group myresourcegroup \
+            --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} \
+            --allowed-methods "GET" "POST" "PATCH" "DELETE"
 
       # Deploy the product service to Azure Container Apps
       - name: Deploy Product Service to Azure Container Apps
@@ -88,8 +96,16 @@ jobs:
             --env-vars \
               PRODUCT_SERVICE_DATABASE_URL=${{   secrets.PRODUCT_SERVICE_DATABASE_URL  }} \
               USER_SERVICE_URL=${{   secrets.USER_SERVICE_URL  }} \
-              INVENTORY_SERVICE_URL=${{  secrets.INVENTORY_SERVICE_URL  }} \
-              CORS_URLS="${{ secrets.ORDER_SERVICE_URL }},${{ secrets.INVENTORY_SERVICE_URL }}"
+              INVENTORY_SERVICE_URL=${{  secrets.INVENTORY_SERVICE_URL  }} 
+
+      # Configure CORS for the user service
+      - name: Configure CORS for Product Service
+        run: |
+          az containerapp ingress cors add \
+            --name service2 \
+            --resource-group myresourcegroup \
+            --allowed-origins ${{ secrets.ORDER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} \
+            --allowed-methods "GET" "POST" "PATCH" "DELETE"
 
       # Deploy the order service to Azure Container Apps
       - name: Deploy Order Service to Azure Container Apps
@@ -107,8 +123,16 @@ jobs:
               ORDER_SERVICE_KAFKA_ORDER_TOPIC=${{ secrets.ORDER_SERVICE_KAFKA_ORDER_TOPIC }} \
               USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
               PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
-              INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
-              CORS_URLS="${{ secrets.USER_SERVICE_URL }}"
+              INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} 
+
+      # Configure CORS for the order service
+      - name: Configure CORS for Order Service
+        run: |
+          az containerapp ingress cors add \
+            --name service3 \
+            --resource-group myresourcegroup \
+            --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} \
+            --allowed-methods "GET" "POST" "PATCH" "DELETE"
               
       # Deploy the inventory service to Azure Container Apps
       - name: Deploy Inventory Service to Azure Container Apps
@@ -124,6 +148,13 @@ jobs:
               INVENTORY_SERVICE_DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
               USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
               PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
-              ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
-              CORS_URLS="${{ secrets.USER_SERVICE_URL }},${{ secrets.PRODUCT_SERVICE_URL }},${{ secrets.ORDER_SERVICE_URL }}"
+              ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} 
       
+      # Configure CORS for the inventory service
+      - name: Configure CORS for Inventory Service
+        run: |
+          az containerapp ingress cors add \
+            --name service4 \
+            --resource-group myresourcegroup \
+            --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} \
+            --allowed-methods "GET" "POST" "PATCH" "DELETE"

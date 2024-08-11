@@ -29,8 +29,8 @@ jobs:
       # Build and push the user service Docker image
       - name: Build and push User Service Docker image
         run: |
-          docker build -t kamilzafar/userservice:latest ./user-service
-          docker push kamilzafar/userservice:latest
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/userservice:latest ../user-service
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/userservice:latest
 
       - name: Export Product Service .env variables
         run: |
@@ -41,8 +41,8 @@ jobs:
       # Build and push the product service Docker image
       - name: Build and push Product Service Docker image
         run: |
-          docker build -t kamilzafar/productservice:latest ./product-service
-          docker push kamilzafar/productservice:latest
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/productservice:latest ./product-service
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/productservice:latest
 
       - name: Export Order Service .env variables
         run: |
@@ -53,8 +53,8 @@ jobs:
       # Build and push the order service Docker image
       - name: Build and push Order Service Docker image
         run: |
-          docker build -t kamilzafar/orderservice:latest ./order-service
-          docker push kamilzafar/orderservice:latest
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/orderservice:latest ./order-service
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/orderservice:latest
 
       - name: Azure Login
         uses: azure/login@v1
@@ -68,7 +68,7 @@ jobs:
             --name service1 \
             --resource-group myresourcegroup \
             --environment mycontainerappenv \
-            --image kamilzafar/userservice:latest \
+            --image ${{ secrets.DOCKER_HUB_USERNAME }}/userservice:latest \
             --target-port 8003 \
             --ingress 'external' \
             --env-vars \
@@ -94,7 +94,7 @@ jobs:
             --name service2 \
             --resource-group myresourcegroup \
             --environment mycontainerappenv \
-            --image kamilzafar/productservice:latest \
+            --image ${{ secrets.DOCKER_HUB_USERNAME }}/productservice:latest \
             --target-port 8004 \
             --ingress 'external' \
             --env-vars \
@@ -110,7 +110,7 @@ jobs:
             --name service3 \
             --resource-group myresourcegroup \
             --environment mycontainerappenv \
-            --image kamilzafar/orderservice:latest \
+            --image ${{ secrets.DOCKER_HUB_USERNAME }}/orderservice:latest \
             --target-port 8005 \
             --ingress 'external' \
             --env-vars \

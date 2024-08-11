@@ -107,3 +107,8 @@ def get_delivered_orders(db: Annotated[Session, Depends(db_session)], user: Anno
 def get_pending_orders(db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(check_admin)]):
     pending_order = service_get_pending_orders(db)
     return pending_order
+
+@app.get("/get/product/{order_id}",response_model=list[Product])
+def get_product_by_orderitem_id(order_id:int,db: Annotated[Session, Depends(db_session)], user: Annotated[User, Depends(get_current_user)]):
+    product = service_get_product_by_orderitem(db=db,order_id=order_id,user=user)
+    return product

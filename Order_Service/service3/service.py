@@ -424,3 +424,12 @@ def service_get_delivered_orders(db: Session) -> List[Order]:
     """
     delivered_order = db.exec(select(Order).where(Order.order_status == "delivered")).all()
     return delivered_order
+
+def service_get_product_by_orderitem(db:Session,order_id:int,user:User):
+    order = service_get_order_by_id(session=db,order_id=order_id,user=user)
+    orderitems = service_get_order_item(order_id=order_id,user=user,db=db)
+    for orderitem in orderitems:
+        product_id = orderitem.product_id
+        products = get_product(product_id)
+    return products
+    

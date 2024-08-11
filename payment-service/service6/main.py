@@ -7,18 +7,21 @@ import json
 import os
 import stripe
 
-app = FastAPI(
-    title="Payment Service",
-    description="Processes payments and manages transaction records.",
-    version="0.1",
-    root_path="/payment"
-)
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Creating database connection")
     create_db_and_tables()
     yield
+
+app = FastAPI(
+    title="Payment Service",
+    description="Processes payments and manages transaction records.",
+    version="0.1",
+    root_path="/payment",
+    lifespan=lifespan
+)
+
+
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 stripe.api_key = settings.SECRET_KEY_STRIPE
@@ -32,7 +35,12 @@ def get_root():
 
 @app.post("/payment")
 def process_payment(order_id:int):
-    payment = generate_checkout_session(order_id)
+    order = service_get_order(order_id)
+    orderitems = service_get_order_item(order_id)
+    product_id = 
+    product = service_get_product(product_id)
+    for orderitem in orderitems:
+      payment = generate_checkout_session(order_id)
     return payment
 
 

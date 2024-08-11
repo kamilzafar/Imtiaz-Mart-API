@@ -1,6 +1,6 @@
 from typing import Optional
 from uuid import UUID
-from sqlmodel import SQLModel,Field
+from sqlmodel import SQLModel,Field,Column
 from enum import Enum
 
 
@@ -17,7 +17,7 @@ class OrderBase(SQLModel):
     contactnumber: str
     city: str
 
-class Order(OrderBase, table = True):
+class Order(OrderBase):
     order_id: int = Field(primary_key=True,default=None)
     user_id: UUID 
     total_price: int
@@ -30,4 +30,40 @@ class OrderUpdate(OrderBase):
     order_status: OrderStatus
 
 class OrderRead(OrderBase):
+    pass
+
+class OrderItem(SQLModel):
+    id: int = Field(primary_key=True,default=None)
+    order_id: int 
+    user_id: UUID 
+    product_id: int 
+    price: int
+    quantity: int
+
+class OrderItemCreate(OrderBase):
+    pass
+
+class Category(str, Enum):
+    electronics = "electronics"
+    clothing = "clothing"
+    food = "food"
+    furniture = "furniture"
+    
+class ProductBase(SQLModel):
+    name: str
+    description: str
+    price: int
+    category: Category = Field(default=Category.clothing, sa_column=Column("category", Enum(Category)))
+
+class Product(ProductBase):
+    id: Optional[int] = Field(default=None, primary_key=True, index=True)
+    user_id: UUID = Field(foreign_key="user.id")
+
+class ProductRead(ProductBase):
+    id: int
+
+class ProductCreate(ProductBase):
+    pass
+
+class ProductUpdate(ProductBase):
     pass

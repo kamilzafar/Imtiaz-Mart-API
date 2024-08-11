@@ -1,4 +1,3 @@
-from jose import jwt, JWTError
 import requests
 from sqlmodel import Session,select
 from fastapi import HTTPException, Depends, status
@@ -12,18 +11,10 @@ from typing import Annotated, List
 from service3 import setting
 import service3.protobuf.order_pb2 as order_pb2
 from aiokafka import AIOKafkaProducer
+from service3.kafka.producer import produce_message
 
-oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth_scheme = OAuth2PasswordBearer(tokenUrl=f"{setting.USER_SERVICE_URL}/auth/login")
 
-async def produce_message():
-    producer = AIOKafkaProducer(bootstrap_servers=setting.KAFKA_BOOTSTRAP_SERVER)
-    await producer.start()
-    try:
-        # Produce message
-        yield producer
-    finally:
-        # Wait for all pending messages to be delivered or expire.
-        await producer.stop()
 
 def get_product(product_id: int) -> Product:
     """

@@ -20,35 +20,17 @@ jobs:
         run: |
           echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
-      - name: Export User Service .env variables
-        run: |
-          if [ -f user-service/.env ]; then
-            export $(cat user-service/.env | xargs)
-          fi
-
       # Build and push the user service Docker image
       - name: Build and push User Service Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/userservice:latest ./user-service
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/userservice:latest
 
-      - name: Export Product Service .env variables
-        run: |
-          if [ -f product-service/.env ]; then
-            export $(cat product-service/.env | xargs)
-          fi
-
       # Build and push the product service Docker image
       - name: Build and push Product Service Docker image
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/productservice:latest ./product-service
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/productservice:latest
-
-      - name: Export Order Service .env variables
-        run: |
-          if [ -f order-service/.env ]; then
-            export $(cat order-service/.env | xargs)
-          fi
 
       # Build and push the order service Docker image
       - name: Build and push Order Service Docker image
@@ -78,9 +60,9 @@ jobs:
               ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }} \
               REFRESH_TOKEN_EXPIRE_MINUTES=${{ secrets.REFRESH_TOKEN_EXPIRE_MINUTES }} \
               JWT_REFRESH_SECRET_KEY=${{ secrets.JWT_REFRESH_SECRET_KEY }} \
-              KAFKA_PRODUCER_TOPIC=${{ secrets.USER_SERVICE_KAFKA_PRODUCER_TOPIC }} \
-              KAFKA_CONSUMER_TOPIC=${{ secrets.USER_SERVICE_KAFKA_CONSUMER_TOPIC }} \
-              KAFKA_BROKER_URL=${{ secrets.USER_SERVICE_KAFKA_BROKER_URL }} \
+              USER_SERVICE_KAFKA_PRODUCER_TOPIC=${{ secrets.USER_SERVICE_KAFKA_PRODUCER_TOPIC }} \
+              USER_SERVICE_KAFKA_CONSUMER_TOPIC=${{ secrets.USER_SERVICE_KAFKA_CONSUMER_TOPIC }} \
+              KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }} \
               PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
               PAYMENT_SERVICE_URL=${{ secrets.PAYMENT_SERVICE_URL }} \
               ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
@@ -115,7 +97,7 @@ jobs:
             --ingress 'external' \
             --env-vars \
               DATABASE_URL=${{ secrets.ORDER_SERVICE_DATABASE_URL  }} \
-              KAFKA_BOOTSTRAP_SERVER=${{ secrets.ORDER_SERVICE_KAFKA_BOOTSTRAP_SERVER  }} \
+              KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER  }} \
               KAFKA_ORDER_TOPIC=${{  secrets.ORDER_SERVICE_KAFKA_ORDER_TOPIC }} \
               USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL  }} \ 
               PRODUCT_SERVICE_URL=${{  secrets.PRODUCT_SERVICE_URL }} \

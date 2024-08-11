@@ -80,8 +80,7 @@ jobs:
           az containerapp ingress cors add \
             --name service1 \
             --resource-group myresourcegroup \
-            --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} \
-            --allowed-methods "GET" "POST" "PATCH" "DELETE"
+            --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} 
 
       # Deploy the product service to Azure Container Apps
       - name: Deploy Product Service to Azure Container Apps
@@ -104,8 +103,7 @@ jobs:
           az containerapp ingress cors add \
             --name service2 \
             --resource-group myresourcegroup \
-            --allowed-origins ${{ secrets.ORDER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} \
-            --allowed-methods "GET" "POST" "PATCH" "DELETE"
+            --allowed-origins ${{ secrets.ORDER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} 
 
       # Deploy the order service to Azure Container Apps
       - name: Deploy Order Service to Azure Container Apps
@@ -131,8 +129,7 @@ jobs:
           az containerapp ingress cors add \
             --name service3 \
             --resource-group myresourcegroup \
-            --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} \
-            --allowed-methods "GET" "POST" "PATCH" "DELETE"
+            --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} 
               
       # Deploy the inventory service to Azure Container Apps
       - name: Deploy Inventory Service to Azure Container Apps
@@ -156,5 +153,4 @@ jobs:
           az containerapp ingress cors add \
             --name service4 \
             --resource-group myresourcegroup \
-            --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} \
-            --allowed-methods "GET" "POST" "PATCH" "DELETE"
+            --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} 

@@ -2,16 +2,17 @@
 FROM python:3.12-slim
 
 # Set the working directory
-WORKDIR /microservice4
+WORKDIR /microservice6
 
 # Install dependencies
 RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    protobuf-compiler \
-    && rm -rf /var/lib/apt/lists/*
+build-essential \
+protobuf-compiler \
+libpq-dev \
+&& apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Copy only the necessary files to install dependencies
-COPY pyproject.toml poetry.lock /microservice4/
+COPY pyproject.toml poetry.lock /microservice6/
 
 # Install poetry
 RUN pip install poetry 
@@ -23,10 +24,10 @@ RUN poetry config virtualenvs.create false
 RUN poetry install --no-dev --no-root
 
 # Copy the application code
-COPY . /microservice4/
+COPY . /microservice6/
 
 # Expose the port the application runs on
-EXPOSE 8006
+EXPOSE 8008
 
 # Define the command to run the application
-CMD ["poetry", "run", "uvicorn", "service4.main:app", "--host", "0.0.0.0", "--port", "8006"]
+CMD ["poetry", "run", "uvicorn", "service6.main:app", "--host", "0.0.0.0", "--port", "8008"]

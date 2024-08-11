@@ -38,6 +38,12 @@ jobs:
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/orderservice:latest ./order-service
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/orderservice:latest
 
+      # Build and push the inventory service Docker image
+      - name: Build and push Inventory Service Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/inventoryservice:latest ./inventory-service
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/inventoryservice:latest
+
       - name: Azure Login
         uses: azure/login@v1
         with:
@@ -98,8 +104,25 @@ jobs:
             --env-vars \
               DATABASE_URL=${{ secrets.ORDER_SERVICE_DATABASE_URL  }} \
               KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER  }} \
-              KAFKA_ORDER_TOPIC=${{  secrets.ORDER_SERVICE_KAFKA_ORDER_TOPIC }} \
+              ORDER_SERVICE_KAFKA_ORDER_TOPIC=${{  secrets.ORDER_SERVICE_KAFKA_ORDER_TOPIC }} \
               USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL  }} \ 
               PRODUCT_SERVICE_URL=${{  secrets.PRODUCT_SERVICE_URL }} \
               INVENTORY_SERVICE_URL=${{  secrets.INVENTORY_SERVICE_URL }} \
               # Add other environment variables for order service
+
+      # Deploy the inventory service to Azure Container Apps
+      - name: Deploy Inventory Service to Azure Container Apps
+        run: |
+          az containerapp create \
+            --name service4 \
+            --resource-group myresourcegroup \
+            --environment mycontainerappenv \
+            --image ${{ secrets.DOCKER_HUB_USERNAME }}/inventoryservice:latest \
+            --target-port 8006 \
+            --ingress 'external' \
+            --env-vars \
+              DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
+              USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
+              PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
+              ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
+              # Add other environment variables for inventory service

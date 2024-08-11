@@ -3,10 +3,14 @@ import requests
 from sqlmodel import Session,select
 from fastapi import HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer
-from service3.models import *
+from service3.models.cart_models import Cart, CartCreate, CartUpdate
+from service3.models.inventory_models import Inventory
+from service3.models.order_models import Order, OrderCreate, OrderItem
+from service3.models.user_models import User
+from service3.models.product_models import Product
 from typing import Annotated, List
 from service3 import setting
-import service3.order_pb2 as order_pb2
+import service3.protobuf.order_pb2 as order_pb2
 from aiokafka import AIOKafkaProducer
 
 oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")

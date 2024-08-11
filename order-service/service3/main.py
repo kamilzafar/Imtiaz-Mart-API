@@ -3,7 +3,8 @@ from contextlib import asynccontextmanager
 from sqlmodel import Session
 from fastapi import FastAPI
 from service3.service import *
-from service3.db import create_db_and_tables, db_session
+from service3.database.db import create_db_and_tables, db_session
+from service3.models.order_models import Order, OrderCreate, OrderUpdate, OrderRead
 from typing import Annotated
 from aiokafka import AIOKafkaProducer
 

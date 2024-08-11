@@ -77,7 +77,7 @@ jobs:
       # Configure CORS for the user service
       - name: Configure CORS for User Service
         run: |
-          az containerapp ingress cors add \
+          az containerapp ingress cors enable \
             --name service1 \
             --resource-group myresourcegroup \
             --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} 
@@ -100,7 +100,7 @@ jobs:
       # Configure CORS for the user service
       - name: Configure CORS for Product Service
         run: |
-          az containerapp ingress cors add \
+          az containerapp ingress cors enable \
             --name service2 \
             --resource-group myresourcegroup \
             --allowed-origins ${{ secrets.ORDER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} 
@@ -126,7 +126,7 @@ jobs:
       # Configure CORS for the order service
       - name: Configure CORS for Order Service
         run: |
-          az containerapp ingress cors add \
+          az containerapp ingress cors enable \
             --name service3 \
             --resource-group myresourcegroup \
             --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} 
@@ -150,7 +150,7 @@ jobs:
       # Configure CORS for the inventory service
       - name: Configure CORS for Inventory Service
         run: |
-          az containerapp ingress cors add \
+          az containerapp ingress cors enable \
             --name service4 \
             --resource-group myresourcegroup \
             --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} 

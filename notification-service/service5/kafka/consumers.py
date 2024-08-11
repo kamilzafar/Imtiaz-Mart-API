@@ -1,7 +1,7 @@
 from aiokafka import AIOKafkaConsumer
 from service5 import settings
-import service5.user_pb2 as user
-import service5.order_pb2 as order
+import service5.protobuf.user_pb2 as user
+import service5.protobuf.order_pb2 as order
 from service5.services import send_email
 
 async def user_consumer_task():

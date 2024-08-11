@@ -72,20 +72,20 @@ jobs:
             --target-port 8003 \
             --ingress 'external' \
             --env-vars \
-              DATABASE_URL = ${{ secrets.USER_SERVICE_DATABASE_URL }} \
-              SECRET_KEY = ${{ secrets.SECRET_KEY }} \
-              ALGORITHM = ${{ secrets.ALGORITHM }} \
-              ACCESS_TOKEN_EXPIRE_MINUTES = ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }} \
-              REFRESH_TOKEN_EXPIRE_MINUTES = ${{ secrets.REFRESH_TOKEN_EXPIRE_MINUTES }} \
-              JWT_REFRESH_SECRET_KEY = ${{ secrets.JWT_REFRESH_SECRET_KEY }} \
-              KAFKA_PRODUCER_TOPIC = ${{ secrets.USER_SERVICE_KAFKA_PRODUCER_TOPIC }} \
-              KAFKA_CONSUMER_TOPIC = ${{ secrets.USER_SERVICE_KAFKA_CONSUMER_TOPIC }} \
-              KAFKA_BROKER_URL = ${{ secrets.USER_SERVICE_KAFKA_BROKER_URL }} \
-              PRODUCT_SERVICE_URL = ${{ secrets.PRODUCT_SERVICE_URL }} \
-              PAYMENT_SERVICE_URL = ${{ secrets.PAYMENT_SERVICE_URL }} \
-              ORDER_SERVICE_URL = ${{ secrets.ORDER_SERVICE_URL }} \
-              INVENTORY_SERVICE_URL = ${{ secrets.INVENTORY_SERVICE_URL }} \
-              NOTIFICATION_SERVICE_URL = ${{ secrets.NOTIFICATION_SERVICE_URL }}
+              DATABASE_URL=${{ secrets.USER_SERVICE_DATABASE_URL }} \
+              SECRET_KEY=${{ secrets.SECRET_KEY }} \
+              ALGORITHM=${{ secrets.ALGORITHM }} \
+              ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }} \
+              REFRESH_TOKEN_EXPIRE_MINUTES=${{ secrets.REFRESH_TOKEN_EXPIRE_MINUTES }} \
+              JWT_REFRESH_SECRET_KEY=${{ secrets.JWT_REFRESH_SECRET_KEY }} \
+              KAFKA_PRODUCER_TOPIC=${{ secrets.USER_SERVICE_KAFKA_PRODUCER_TOPIC }} \
+              KAFKA_CONSUMER_TOPIC=${{ secrets.USER_SERVICE_KAFKA_CONSUMER_TOPIC }} \
+              KAFKA_BROKER_URL=${{ secrets.USER_SERVICE_KAFKA_BROKER_URL }} \
+              PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
+              PAYMENT_SERVICE_URL=${{ secrets.PAYMENT_SERVICE_URL }} \
+              ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
+              INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
+              NOTIFICATION_SERVICE_URL=${{ secrets.NOTIFICATION_SERVICE_URL }}
 
       # Deploy the product service to Azure Container Apps
       - name: Deploy Product Service to Azure Container Apps
@@ -98,9 +98,9 @@ jobs:
             --target-port 8004 \
             --ingress 'external' \
             --env-vars \
-              DATABASE_URL = ${{   secrets.PRODUCT_SERVICE_DATABASE_URL  }} \
-              USER_SERVICE_URL = ${{   secrets.USER_SERVICE_URL  }} \
-              INVENTORY_SERVICE_URL = ${{  secrets.INVENTORY_SERVICE_URL  }} \
+              DATABASE_URL=${{   secrets.PRODUCT_SERVICE_DATABASE_URL  }} \
+              USER_SERVICE_URL=${{   secrets.USER_SERVICE_URL  }} \
+              INVENTORY_SERVICE_URL=${{  secrets.INVENTORY_SERVICE_URL  }} \
               # Add other environment variables for product service
 
       # Deploy the order service to Azure Container Apps
@@ -114,10 +114,10 @@ jobs:
             --target-port 8005 \
             --ingress 'external' \
             --env-vars \
-              DATABASE_URL = ${{ secrets.ORDER_SERVICE_DATABASE_URL  }} \
-              KAFKA_BOOTSTRAP_SERVER = ${{ secrets.ORDER_SERVICE_KAFKA_BOOTSTRAP_SERVER  }} \
-              KAFKA_ORDER_TOPIC = ${{  secrets.ORDER_SERVICE_KAFKA_ORDER_TOPIC }} \
-              USER_SERVICE_URL = ${{ secrets.USER_SERVICE_URL  }} \ 
-              PRODUCT_SERVICE_URL = ${{  secrets.PRODUCT_SERVICE_URL }} \
-              INVENTORY_SERVICE_URL = ${{  secrets.INVENTORY_SERVICE_URL }} \
+              DATABASE_URL=${{ secrets.ORDER_SERVICE_DATABASE_URL  }} \
+              KAFKA_BOOTSTRAP_SERVER=${{ secrets.ORDER_SERVICE_KAFKA_BOOTSTRAP_SERVER  }} \
+              KAFKA_ORDER_TOPIC=${{  secrets.ORDER_SERVICE_KAFKA_ORDER_TOPIC }} \
+              USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL  }} \ 
+              PRODUCT_SERVICE_URL=${{  secrets.PRODUCT_SERVICE_URL }} \
+              INVENTORY_SERVICE_URL=${{  secrets.INVENTORY_SERVICE_URL }} \
               # Add other environment variables for order service

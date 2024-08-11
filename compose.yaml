@@ -102,77 +102,77 @@ services:
       - kong_data:/var/lib/postgresql/data
 
   service1:
-    image: kamilzafar/user-service
+    image: kamilzafar/userservice:latest
     build:
-      context: ./User_Service
-      dockerfile: Dockerfile.prod
+      context: ./user-service
+      dockerfile: Dockerfile
     ports:
       - "8003:8003"
     volumes:
-      - ./User_Service:/microservice1/
+      - ./user-service:/microservice1/
     depends_on:
       - postgres_db
       - broker
 
   service2:
-    image: kamilzafar/product-service
+    image: kamilzafar/productservice:latest
     build:
-      context: ./Product_Service
-      dockerfile: Dockerfile.prod
+      context: ./product-service
+      dockerfile: Dockerfile
     ports:
       - "8004:8004"
     volumes:
-      - ./Product_Service:/microservice2/
+      - ./product-service:/microservice2/
     depends_on:
       - postgres_db
 
   service3:
-    image: kamilzafar/order-service
+    image: kamilzafar/orderservice:latest
     build:
-      context: ./Order_Service
-      dockerfile: Dockerfile.prod
+      context: ./order-service
+      dockerfile: Dockerfile
     ports:
       - "8005:8005"
     volumes:
-      - ./Order_Service:/microservice3/
+      - ./order-service:/microservice3/
     depends_on:
       - postgres_db
       - broker
 
   service4:
-    image: kamilzafar/inventory-service
+    image: kamilzafar/inventoryservice:latest
     build:
-      context: ./Inventory_Service
-      dockerfile: Dockerfile.prod
+      context: ./inventory-service
+      dockerfile: Dockerfile
     ports:
       - "8006:8006"
     volumes:
-      - ./Inventory_Service:/microservice4/
+      - ./inventory-service:/microservice4/
     depends_on:
       - postgres_db
 
   service5:
-    image: kamilzafar/notification-service
+    image: kamilzafar/notificationservice:latest
     build: 
-      context: ./Notification_Service
-      dockerfile: Dockerfile.prod
+      context: ./notification-service
+      dockerfile: Dockerfile
     ports:
       - "8007:8007"
     volumes:
-      - ./Notification_Service:/microservice5/
+      - ./notification-service:/microservice5/
     depends_on:
       - postgres_db
       - broker
 
   service6:
-    image: kamilzafar/payment-service
+    image: kamilzafar/paymentservice:latest
     build:
-      context: ./Payment_Service
-      dockerfile: Dockerfile.prod
+      context: ./payment-service
+      dockerfile: Dockerfile
     ports:
       - "8008:8008"
     volumes:
-      - ./Payment_Service:/microservice6/
+      - ./payment-service:/microservice6/
     depends_on:
       - postgres_db
       - broker
@@ -227,7 +227,7 @@ services:
   specs-combiner-server:
     build:
       context: ./specs-combiner
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile
     volumes:
       - ./specs-combiner:/code/ # Sync local development directory with the container
     depends_on:

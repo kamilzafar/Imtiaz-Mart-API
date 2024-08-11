@@ -7,5 +7,4 @@ except FileNotFoundError:
 
 DATABASE_URL = config("DATABASE_URL", cast=str)
 USER_SERVICE_URL = config("USER_SERVICE_URL", cast=str)
-ORDER_SERVICE_URL = config("ORDER_SERVICE_URL", cast=str)
 INVENTORY_SERVICE_URL = config("INVENTORY_SERVICE_URL", cast=str)

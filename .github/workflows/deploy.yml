@@ -86,7 +86,7 @@ jobs:
             --target-port 8004 \
             --ingress 'external' \
             --env-vars \
-              DATABASE_URL=${{   secrets.PRODUCT_SERVICE_DATABASE_URL  }} \
+              PRODUCT_SERVICE_DATABASE_URL=${{   secrets.PRODUCT_SERVICE_DATABASE_URL  }} \
               USER_SERVICE_URL=${{   secrets.USER_SERVICE_URL  }} \
               INVENTORY_SERVICE_URL=${{  secrets.INVENTORY_SERVICE_URL  }} \
               # Add other environment variables for product service
@@ -102,7 +102,7 @@ jobs:
             --target-port 8005 \
             --ingress 'external' \
             --env-vars \
-              DATABASE_URL=${{ secrets.ORDER_SERVICE_DATABASE_URL  }} \
+              ORDER_SERVICE_DATABASE_URL=${{ secrets.ORDER_SERVICE_DATABASE_URL  }} \
               KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER  }} \
               ORDER_SERVICE_KAFKA_ORDER_TOPIC=${{  secrets.ORDER_SERVICE_KAFKA_ORDER_TOPIC }} \
               USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL  }} \ 
@@ -121,7 +121,7 @@ jobs:
             --target-port 8006 \
             --ingress 'external' \
             --env-vars \
-              DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
+              INVENTORY_SERVICE_DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
               USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
               PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
               ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \

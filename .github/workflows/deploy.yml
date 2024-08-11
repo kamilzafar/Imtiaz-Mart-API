@@ -72,7 +72,8 @@ jobs:
               PAYMENT_SERVICE_URL=${{ secrets.PAYMENT_SERVICE_URL }} \
               ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
               INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
-              NOTIFICATION_SERVICE_URL=${{ secrets.NOTIFICATION_SERVICE_URL }}
+              NOTIFICATION_SERVICE_URL=${{ secrets.NOTIFICATION_SERVICE_URL }} \
+              CORS_URLS="${{ secrets.USER_SERVICE_URL }},${{ secrets.PRODUCT_SERVICE_URL }},${{ secrets.ORDER_SERVICE_URL }},${{ secrets.INVENTORY_SERVICE_URL }}"
 
       # Deploy the product service to Azure Container Apps
       - name: Deploy Product Service to Azure Container Apps
@@ -87,7 +88,8 @@ jobs:
             --env-vars \
               PRODUCT_SERVICE_DATABASE_URL=${{   secrets.PRODUCT_SERVICE_DATABASE_URL  }} \
               USER_SERVICE_URL=${{   secrets.USER_SERVICE_URL  }} \
-              INVENTORY_SERVICE_URL=${{  secrets.INVENTORY_SERVICE_URL  }} 
+              INVENTORY_SERVICE_URL=${{  secrets.INVENTORY_SERVICE_URL  }} \
+              CORS_URLS="${{ secrets.ORDER_SERVICE_URL }},${{ secrets.INVENTORY_SERVICE_URL }}"
 
       # Deploy the order service to Azure Container Apps
       - name: Deploy Order Service to Azure Container Apps
@@ -105,7 +107,8 @@ jobs:
               ORDER_SERVICE_KAFKA_ORDER_TOPIC=${{ secrets.ORDER_SERVICE_KAFKA_ORDER_TOPIC }} \
               USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
               PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
-              INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }}
+              INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
+              CORS_URLS="${{ secrets.USER_SERVICE_URL }}"
               
       # Deploy the inventory service to Azure Container Apps
       - name: Deploy Inventory Service to Azure Container Apps
@@ -121,5 +124,6 @@ jobs:
               INVENTORY_SERVICE_DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
               USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
               PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
-              ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }}
+              ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
+              CORS_URLS="${{ secrets.USER_SERVICE_URL }},${{ secrets.PRODUCT_SERVICE_URL }},${{ secrets.ORDER_SERVICE_URL }}"
       

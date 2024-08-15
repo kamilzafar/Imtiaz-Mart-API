@@ -154,3 +154,58 @@ jobs:
             --name service4 \
             --resource-group myresourcegroup \
             --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} 
+
+      # Deploy the notification service to Azure Container Apps
+      - name: Deploy Notification Service to Azure Container Apps
+        run : |
+          az containerapp create \
+            --name service5 \
+            --resource-group myresourcegroup \
+            --environment mycontainerappenv \
+            --image ${{ secrets.DOCKER_HUB_USERNAME }}/notificationservice:latest \
+            --target-port 8007 \
+            --ingress 'external' \
+            --env-vars \
+              INVENTORY_SERVICE_DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
+              NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC = "user_service"
+              NOTIFICATION_SERVICE_KAFKA_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_GROUP_ID }}
+              KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }}
+              NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC }}
+              NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID }}
+              smtp_server=${{ secrets.SMTP_SERVER }}
+              smtp_port=${{ secrets.SMTP_PORT }}
+              smtp_email=${{ secrets.SMTP_EMAIL }}
+              SMTP_PASSWORD=${{ secrets.SMTP_EMAIL }}
+              smtp_username=${{ secrets.SMTP_USERNAME }}
+      
+      # Configure CORS for the inventory service
+      - name: Configure CORS for Notification Service
+        run: |
+          az containerapp ingress cors enable \
+            --name service5 \
+            --resource-group myresourcegroup \
+            --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} ${{ secrets.NOTIFICATION_SERVICE_URL }}
+            
+      # Deploy the payment service to Azure Container Apps
+      # - name: Deploy Payment Service to Azure Container Apps
+      #   run: |
+      #     az containerapp create \
+      #       --name service6 \
+      #       --resource-group myresourcegroup \
+      #       --environment mycontainerappenv \
+      #       --image ${{ secrets.DOCKER_HUB_USERNAME }}/paymentservice:latest \
+      #       --target-port 8006 \
+      #       --ingress 'external' \
+      #       --env-vars \
+      #         INVENTORY_SERVICE_DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
+      #         USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
+      #         PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
+      #         ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} 
+      
+      # # Configure CORS for the inventory service
+      # - name: Configure CORS for Payment Service
+      #   run: |
+      #     az containerapp ingress cors enable \
+      #       --name service6 \
+      #       --resource-group myresourcegroup \
+      #       --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} 

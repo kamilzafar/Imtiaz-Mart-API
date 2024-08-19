@@ -1,17 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,Request,HTTPException
 from contextlib import asynccontextmanager
-from service5.database.db import create_db_and_tables
 import asyncio
 from service5.kafka.consumers import user_consumer_task, order_consumer_task
 from fastapi_mail import FastMail, MessageSchema
 from starlette.responses import JSONResponse
 from service5.models.email_model import EmailSchema
-from service5.services import conf
+from service5.services import conf,send_email
+from service5.protobuf import user_pb2
+
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting up")
-    create_db_and_tables()
     asyncio.create_task(user_consumer_task())
     asyncio.create_task(order_consumer_task())
     yield
@@ -27,6 +28,30 @@ app = FastAPI(
 @app.get("/", tags=["Root"])
 def read_root():
     return {"service": "Notification Service"}
+
+
+@app.post("/user_service")
+async def handle_user_signup(request: Request):
+    try:
+        data = await request.body()
+
+        # Parse the protobuf message
+        user_message = user_pb2.User()
+        user_message.ParseFromString(data)
+
+        # Extract details and send an email
+        email = user_message.email
+        name = user_message.username
+        subject = "Welcome to KR Mart"
+        body = f"Hi {name},\n\nThank you for signing up with KR Mart!\n\nBest regards,\nKR Mart Team"
+
+        send_email(email=email, name=name, subject=subject, body=body)
+
+        return {"status": "Email sent"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
 
 @app.post("/send_mail", tags=["Email"])
 async def send_mail(email: EmailSchema):

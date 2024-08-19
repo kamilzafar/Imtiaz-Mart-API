@@ -13,7 +13,7 @@ from service1.services import create_access_token, get_password_hash, get_user_b
 from service1.models.user_models import TokenData, User, UserCreate, UserUpdate, Userlogin
 import service1.user_pb2 as user_pb2
 from typing import Annotated
-import dapr.clients
+from dapr.clients import DaprClient 
 
 def user_login(db: Session, form_data: OAuth2PasswordRequestForm):
     user: Userlogin = get_user_by_username(db, form_data.username)
@@ -40,7 +40,7 @@ def user_login(db: Session, form_data: OAuth2PasswordRequestForm):
     return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": access_token_expires+refresh_token_expires, "token_type": "bearer"}
 
 def publish_user_signup(user_data: User):
-    with dapr.clients.DaprClient() as d:
+    with DaprClient() as d:
         user_message = user_pb2.User(
             username=user_data.username,
             email=user_data.email,
@@ -50,6 +50,7 @@ def publish_user_signup(user_data: User):
             topic_name=settings.KAFKA_PRODUCER_TOPIC,
             data=user_message.SerializeToString(),
         )
+        
     print(f"Published user signup event for {user_data.username}")
 
 async def signup_user(user: UserCreate, db: Session, producer: Annotated[AIOKafkaProducer, Depends(produce_message)]) -> User:

@@ -1,0 +1,15 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: kafka-pubsub
+spec:
+  type: pubsub.kafka
+  metadata:
+    - name: brokers
+      value: broker:19092
+    - name: consumerGroup
+      value: notification-consumer-group
+    - name: topics
+      value: user_service  # The Kafka topic to subscribe to
+    - name: authRequired
+      value: "false"

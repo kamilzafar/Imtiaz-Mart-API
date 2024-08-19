@@ -83,15 +83,7 @@ services:
     secrets:
       - kong_postgres_password
     healthcheck:
-      test:
-        [
-          "CMD",
-          "pg_isready",
-          "-d",
-          "${KONG_PG_DATABASE:-kong}",
-          "-U",
-          "${KONG_PG_USER:-kong}"
-        ]
+      test: [ "CMD", "pg_isready", "-d", "${KONG_PG_DATABASE:-kong}", "-U", "${KONG_PG_USER:-kong}" ]
       interval: 30s
       timeout: 30s
       retries: 3
@@ -102,7 +94,7 @@ services:
       - kong_data:/var/lib/postgresql/data
 
   service1:
-    image: kamilzafar/userservice:latest
+    image: razapanjwani/userservice:latest
     build:
       context: ./user-service
       dockerfile: Dockerfile
@@ -113,9 +105,15 @@ services:
     depends_on:
       - postgres_db
       - broker
+    command: >
+      dapr run --app-id user-service 
+           --app-port 8003 
+           --dapr-http-port 3500 
+           --components-path /component
+           -- python /microservice1/service1/main.py
 
   service2:
-    image: kamilzafar/productservice:latest
+    image: razapanjwani/productservice:latest
     build:
       context: ./product-service
       dockerfile: Dockerfile
@@ -127,7 +125,7 @@ services:
       - postgres_db
 
   service3:
-    image: kamilzafar/orderservice:latest
+    image: razapanjwani/orderservice:latest
     build:
       context: ./order-service
       dockerfile: Dockerfile
@@ -140,7 +138,7 @@ services:
       - broker
 
   service4:
-    image: kamilzafar/inventoryservice:latest
+    image: razapanjwani/inventoryservice:latest
     build:
       context: ./inventory-service
       dockerfile: Dockerfile
@@ -152,8 +150,8 @@ services:
       - postgres_db
 
   service5:
-    image: kamilzafar/notificationservice:latest
-    build: 
+    image: razapanjwani/notificationservice:latest
+    build:
       context: ./notification-service
       dockerfile: Dockerfile
     ports:
@@ -163,9 +161,15 @@ services:
     depends_on:
       - postgres_db
       - broker
+    command: >
+      dapr run --app-id notification-service 
+          --app-port 8007 
+          --dapr-http-port 3501 
+          --components-path /component
+          -- python /microservice5/service5/main.py
 
   service6:
-    image: kamilzafar/paymentservice:latest
+    image: razapanjwani/paymentservice:latest
     build:
       context: ./payment-service
       dockerfile: Dockerfile

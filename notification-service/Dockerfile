@@ -10,11 +10,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 RUN apt-get update && apt-get install -y \
-build-essential \
-protobuf-compiler \
-libpq-dev \
-&& apt-get clean && rm -rf /var/lib/apt/lists/*
-    
+    build-essential \
+    protobuf-compiler \
+    libpq-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
+
+
 # Copy only the necessary files to install dependencies
 COPY pyproject.toml poetry.lock /microservice5/
 

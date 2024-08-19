@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["Syed Kamil Zafar <kamilzafar54@gmail.com>"]
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -16,6 +17,7 @@ python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 requests = "^2.32.3"
 aiokafka = "^0.10.0"
 protobuf = "^5.27.2"
+dapr = "^1.13.0"
 
 
 [build-system]

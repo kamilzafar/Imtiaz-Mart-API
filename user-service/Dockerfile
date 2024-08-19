@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y \
     protobuf-compiler \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+RUN wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
+
+
 # Copy only the necessary files to install dependencies
 COPY pyproject.toml poetry.lock /microservice1/
 

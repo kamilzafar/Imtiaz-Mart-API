@@ -6,7 +6,7 @@ from service4 import setting
 from service4.models.user_model import User
 from service4.models.product_model import Product
 
-oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth_scheme = OAuth2PasswordBearer(tokenUrl=f"{setting.USER_SERVICE_URL}/auth/login")
 
 async def get_current_user(token: Annotated[str, Depends(oauth_scheme)]) -> User:
     """

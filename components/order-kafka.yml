@@ -1,0 +1,25 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: order-kafka-pubsub
+spec:
+  type: pubsub.kafka
+  version: v1
+  metadata:
+  - name: brokers
+    value: "broker:19092"  # The internal Kafka broker address
+  - name: consumerGroup
+    value: "order_service_group"  # Name of the consumer group
+  - name: topics
+    value: "order_service"
+  - name: authRequired
+    value: "false"  # Set to true if you have authentication
+  - name: disableTls
+    value: "true"  # Disable TLS if not using SSL
+scopes:
+- service1
+- service2
+- service3
+- service4
+- service5
+- service6

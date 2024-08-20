@@ -1,10 +1,9 @@
-from fastapi import FastAPI, Depends, HTTPException, status,Request
+from fastapi import FastAPI, Request
 from fastapi.security import OAuth2PasswordBearer
 from service6.db import create_db_and_tables
 from contextlib import asynccontextmanager
 from service6.service import *
 import json
-import os
 import stripe
 
 @asynccontextmanager
@@ -23,7 +22,7 @@ app = FastAPI(
 
 
 
-oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
+oauth_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.USER_SERVICE_URL}/auth/login")
 stripe.api_key = settings.SECRET_KEY_STRIPE
 
 

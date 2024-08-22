@@ -1,7 +1,7 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: order-kafka-pubsub
+  name: order-service
 spec:
   type: pubsub.kafka
   version: v1

@@ -1,0 +1,21 @@
+apiVersion: dapr.io/v1alpha1
+kind: Subscription
+metadata:
+  name: notification-subscription
+spec:
+  topic: user_service
+  route: /user-events
+  pubsubname: kafka-pubsub
+  metadata:
+    rawPayload: "true"
+---
+apiVersion: dapr.io/v1alpha1
+kind: Subscription
+metadata:
+  name: notification-subscription-order
+spec:
+  topic: order_service
+  route: /order-events
+  pubsubname: kafka-pubsub
+  metadata:
+    rawPayload: "true"

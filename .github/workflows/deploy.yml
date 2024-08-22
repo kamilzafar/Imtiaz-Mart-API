@@ -83,7 +83,7 @@ jobs:
             --name service1 \
             --resource-group myresourcegroup \
             --environment mycontainerappenv \
-            --component ./components/userkafka.yml
+            --component ./components/pubsub.yaml
 
       # Configure CORS for the user service
       - name: Configure CORS for User Service
@@ -126,6 +126,9 @@ jobs:
             --image ${{ secrets.DOCKER_HUB_USERNAME }}/orderservice:latest \
             --target-port 8005 \
             --ingress 'external' \
+            --dapr-app-id order-service \
+            --dapr-app-port 8005 \
+            --dapr-enabled true \
             --env-vars \
               ORDER_SERVICE_DATABASE_URL=${{ secrets.ORDER_SERVICE_DATABASE_URL }} \
               KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }} \
@@ -141,6 +144,14 @@ jobs:
             --name service3 \
             --resource-group myresourcegroup \
             --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.INVENTORY_SERVICE_URL }} 
+
+      - name: Deploy Dapr Kafka Component
+        run: |
+          az containerapp dapr component create \
+            --name order-service \
+            --resource-group myresourcegroup \
+            --environment mycontainerappenv \
+            --component ./components/pubsub.yaml
               
       # Deploy the inventory service to Azure Container Apps
       - name: Deploy Inventory Service to Azure Container Apps
@@ -197,6 +208,14 @@ jobs:
             --resource-group myresourcegroup \
             --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} ${{ secrets.NOTIFICATION_SERVICE_URL }}
             
+
+      - name: Deploy Dapr Subscription Configuration for Notification Service
+        run: |
+          az containerapp dapr component create \
+            --name notification-subscriptions \
+            --resource-group myresourcegroup \
+            --environment mycontainerappenv \
+            --component ./components/notification-subscriptions.yml
       # Deploy the payment service to Azure Container Apps
       # - name: Deploy Payment Service to Azure Container Apps
       #   run: |

@@ -76,13 +76,13 @@ jobs:
               INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
               NOTIFICATION_SERVICE_URL=${{ secrets.NOTIFICATION_SERVICE_URL }} 
 
-      - name: Deploy Dapr Kafka Component
+      # Deploy Dapr Kafka Component for the Environment
+      - name: Deploy Dapr Kafka Component for Environment
         run: |
-          az containerapp dapr component create \
-            --name service1 \
+          az containerapp env dapr-component set \
+            --name mycontainerappenv \
             --resource-group myresourcegroup \
-            --environment mycontainerappenv \
-            --component ./components/pubsub.yaml
+            --components-file ./components/pubsub.yaml
 
       # Configure CORS for the user service
       - name: Configure CORS for User Service

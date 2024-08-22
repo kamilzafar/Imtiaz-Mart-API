@@ -94,7 +94,7 @@ services:
       - kong_data:/var/lib/postgresql/data
 
   service1:
-    image: razapanjwani/userservice:latest
+    image: kamilzafar/userservice:latest
     build:
       context: ./user-service
       dockerfile: Dockerfile
@@ -106,14 +106,14 @@ services:
       - postgres_db
       - broker
     command: >
-      dapr run --app-id user-service 
-           --app-port 8003 
-           --dapr-http-port 3500 
-           --components-path /component
-           -- python /microservice1/service1/main.py
+      dapr run --app-id user-service \
+           --app-port 8003 \
+           --dapr-http-port 3500 \ 
+           --resources-path ./components \
+           -- python /microservice1/service1/main.py 
 
   service2:
-    image: razapanjwani/productservice:latest
+    image: kamilzafar/productservice:latest
     build:
       context: ./product-service
       dockerfile: Dockerfile
@@ -125,7 +125,7 @@ services:
       - postgres_db
 
   service3:
-    image: razapanjwani/orderservice:latest
+    image: kamilzafar/orderservice:latest
     build:
       context: ./order-service
       dockerfile: Dockerfile
@@ -138,7 +138,7 @@ services:
       - broker
 
   service4:
-    image: razapanjwani/inventoryservice:latest
+    image: kamilzafar/inventoryservice:latest
     build:
       context: ./inventory-service
       dockerfile: Dockerfile
@@ -150,7 +150,7 @@ services:
       - postgres_db
 
   service5:
-    image: razapanjwani/notificationservice:latest
+    image: kamilzafar/notificationservice:latest
     build:
       context: ./notification-service
       dockerfile: Dockerfile
@@ -169,7 +169,7 @@ services:
           -- python /microservice5/service5/main.py
 
   service6:
-    image: razapanjwani/paymentservice:latest
+    image: kamilzafar/paymentservice:latest
     build:
       context: ./payment-service
       dockerfile: Dockerfile

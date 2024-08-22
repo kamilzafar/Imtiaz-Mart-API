@@ -8,14 +8,20 @@ WORKDIR /microservice1
 RUN apt-get update && apt-get install -y \
     build-essential \
     libpq-dev \
+    wget \
     protobuf-compiler \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
 
+RUN dapr init --slim
 
 # Copy only the necessary files to install dependencies
 COPY pyproject.toml poetry.lock /microservice1/
+
+# COPY entrypoint.sh /microservice1/entrypoint.sh
+
+# RUN chmod +x /microservice1/entrypoint.sh
 
 # Install poetry
 RUN pip install poetry 
@@ -33,4 +39,5 @@ COPY . /microservice1/
 EXPOSE 8003
 
 # Define the command to run the application
+# ENTRYPOINT ["/microservice1/entrypoint.sh"]
 CMD ["poetry", "run", "uvicorn", "service1.main:app", "--host", "0.0.0.0", "--port", "8003"]

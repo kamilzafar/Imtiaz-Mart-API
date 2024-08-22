@@ -59,6 +59,9 @@ jobs:
             --image ${{ secrets.DOCKER_HUB_USERNAME }}/userservice:latest \
             --target-port 8003 \
             --ingress 'external' \
+            --dapr-app-id user-service \
+            --dapr-app-port 8003 \
+            --dapr-enabled true \
             --env-vars \
               DATABASE_URL=${{ secrets.USER_SERVICE_DATABASE_URL }} \
               SECRET_KEY=${{ secrets.SECRET_KEY }} \
@@ -73,6 +76,14 @@ jobs:
               ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
               INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
               NOTIFICATION_SERVICE_URL=${{ secrets.NOTIFICATION_SERVICE_URL }} 
+
+      - name: Deploy Dapr Kafka Component
+        run: |
+          az containerapp dapr component create \
+            --name service1 \
+            --resource-group myresourcegroup \
+            --environment mycontainerappenv \
+            --component ./components/userkafka.yml
 
       # Configure CORS for the user service
       - name: Configure CORS for User Service

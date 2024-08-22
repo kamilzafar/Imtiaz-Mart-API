@@ -3,6 +3,9 @@ kind: Component
 metadata:
   name: user-kafka-pubsub
 spec:
+  features:
+    - name: DisableScheduler
+      enabled: true
   type: pubsub.kafka
   version: v1
   metadata:
@@ -17,9 +20,4 @@ spec:
   - name: disableTls
     value: "true"  # Disable TLS if not using SSL
 scopes:
-- service1
-- service2
-- service3
 - service4
-- service5
-- service6

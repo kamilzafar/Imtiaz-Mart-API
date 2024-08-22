@@ -12,16 +12,23 @@ RUN apt-get update && apt-get install -y \
     protobuf-compiler \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# RUN wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
+
+# Set the environment variable for dapr
+ENV PATH="/root/.dapr/bin:${PATH}"
+
+# Install dapr
 RUN wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
 
+# Initialize dapr
 RUN dapr init --slim
+
+# Verify dapr installation
+RUN which dapr
 
 # Copy only the necessary files to install dependencies
 COPY pyproject.toml poetry.lock /microservice1/
 
-# COPY entrypoint.sh /microservice1/entrypoint.sh
-
-# RUN chmod +x /microservice1/entrypoint.sh
 
 # Install poetry
 RUN pip install poetry 
@@ -39,5 +46,4 @@ COPY . /microservice1/
 EXPOSE 8003
 
 # Define the command to run the application
-# ENTRYPOINT ["/microservice1/entrypoint.sh"]
-CMD ["poetry", "run", "uvicorn", "service1.main:app", "--host", "0.0.0.0", "--port", "8003"]
+CMD ["dapr", "run", "--app-id", "user-service", "--app-port", "8003", "--dapr-http-port", "3500", "--resources-path", "./components", "--", "poetry", "run", "uvicorn", "service1.main:app", "--host", "0.0.0.0", "--port", "8003"]

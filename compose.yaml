@@ -105,12 +105,6 @@ services:
     depends_on:
       - postgres_db
       - broker
-    command: >
-      dapr run --app-id user-service \
-           --app-port 8003 \
-           --dapr-http-port 3500 \ 
-           --resources-path ./components \
-           -- python /microservice1/service1/main.py 
 
   service2:
     image: kamilzafar/productservice:latest

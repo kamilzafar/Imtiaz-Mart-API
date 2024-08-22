@@ -61,7 +61,6 @@ jobs:
             --ingress 'external' \
             --dapr-app-id user-service \
             --dapr-app-port 8003 \
-            --dapr-enabled true \
             --env-vars \
               DATABASE_URL=${{ secrets.USER_SERVICE_DATABASE_URL }} \
               SECRET_KEY=${{ secrets.SECRET_KEY }} \
@@ -128,7 +127,6 @@ jobs:
             --ingress 'external' \
             --dapr-app-id order-service \
             --dapr-app-port 8005 \
-            --dapr-enabled true \
             --env-vars \
               ORDER_SERVICE_DATABASE_URL=${{ secrets.ORDER_SERVICE_DATABASE_URL }} \
               KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }} \

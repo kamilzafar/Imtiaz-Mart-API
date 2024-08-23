@@ -17,12 +17,6 @@ from service1 import settings
 
 def user_login(db: Session, form_data: OAuth2PasswordRequestForm):
     user: Userlogin = get_user_by_username(db, form_data.username)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
     if not verify_password(form_data.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -46,9 +40,10 @@ def publish_user_signup(user_data: User):
             email=user_data.email,
         )
         d.publish_event(
-            pubsub_name="user_service_group",
+            pubsub_name=settings.KAFKA_GROUP_ID,
             topic_name=settings.KAFKA_PRODUCER_TOPIC,
             data=user_message.SerializeToString(),
+            data_content_type='application/json',
         )
         
     print(f"Published user signup event for {user_data.username}")

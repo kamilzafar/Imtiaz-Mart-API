@@ -55,11 +55,18 @@ jobs:
         run: |
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/notificationservice:latest ./notification-service
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/notificationservice:latest
-
+        
       - name: Azure Login
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      
+      - name: Deploy Dapr Components
+        run: | 
+          dapr components publish ./user-service/components/pubsub.yaml 
+          dapr components publish ./order-service/components/pubsub.yaml 
+          dapr components publish ./notification-service/components/pubsub.yaml 
 
       # Deploy the user service to Azure Container Apps
       - name: Deploy User Service to Azure Container Apps
@@ -74,7 +81,7 @@ jobs:
             --enable-dapr 'true' \
             --dapr-app-protocol 'http' \
             --dapr-app-id user-service \
-            --dapr-app-port 8003 \
+            --dapr-app-port 3003 \
             --env-vars \
               DATABASE_URL=${{ secrets.USER_SERVICE_DATABASE_URL }} \
               SECRET_KEY=${{ secrets.SECRET_KEY }} \
@@ -134,7 +141,7 @@ jobs:
             --enable-dapr 'true' \
             --dapr-app-protocol 'http' \
             --dapr-app-id order-service \
-            --dapr-app-port 8005 \
+            --dapr-app-port 3005 \
             --env-vars \
               ORDER_SERVICE_DATABASE_URL=${{ secrets.ORDER_SERVICE_DATABASE_URL }} \
               KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }} \
@@ -188,7 +195,7 @@ jobs:
             --enable-dapr 'true' \
             --dapr-app-protocol 'http' \
             --dapr-app-id notification-service \
-            --dapr-app-port 8007 \
+            --dapr-app-port 3007 \
             --env-vars \
               INVENTORY_SERVICE_DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
               NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC = "user_service"

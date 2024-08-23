@@ -61,13 +61,6 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      
-      - name: Deploy Dapr Components
-        run: | 
-          dapr components publish ./user-service/components/pubsub.yaml 
-          dapr components publish ./order-service/components/pubsub.yaml 
-          dapr components publish ./notification-service/components/pubsub.yaml 
-
       # Deploy the user service to Azure Container Apps
       - name: Deploy User Service to Azure Container Apps
         run: |

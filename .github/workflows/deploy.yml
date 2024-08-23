@@ -50,6 +50,12 @@ jobs:
           docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/inventoryservice:latest ./inventory-service
           docker push ${{ secrets.DOCKER_HUB_USERNAME }}/inventoryservice:latest
 
+      # Build and push the notification service Docker image
+      - name: Build and push Notification Service Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/notificationservice:latest ./notification-service
+          docker push ${{ secrets.DOCKER_HUB_USERNAME }}/notificationservice:latest
+
       - name: Azure Login
         uses: azure/login@v1
         with:
@@ -81,9 +87,9 @@ jobs:
               ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
               INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
               NOTIFICATION_SERVICE_URL=${{ secrets.NOTIFICATION_SERVICE_URL }} \
-              -dapr-invocation-port 3500 \
-              --dapr-http-port 3500 \
-              --dapr-grpc-port 50002
+            --dapr-invocation-port 3500 \
+            --dapr-http-port 3500 \
+            --dapr-grpc-port 50002
 
       # Configure CORS for the user service
       - name: Configure CORS for User Service
@@ -135,9 +141,9 @@ jobs:
               USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
               PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
               INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
-              -dapr-invocation-port 3501 \
-              --dapr-http-port 3501 \
-              --dapr-grpc-port 50002
+            --dapr-invocation-port 3501 \
+            --dapr-http-port 3501 \
+            --dapr-grpc-port 50002
 
       # Configure CORS for the order service
       - name: Configure CORS for Order Service
@@ -203,9 +209,9 @@ jobs:
               smtp_email=${{ secrets.SMTP_EMAIL }} \
               SMTP_PASSWORD=${{ secrets.SMTP_EMAIL }} \
               smtp_username=${{ secrets.SMTP_USERNAME }} \
-              -dapr-invocation-port 3502 \
-              --dapr-http-port 3502 \
-              --dapr-grpc-port 50002
+            --dapr-invocation-port 3502 \
+            --dapr-http-port 3502 \
+            --dapr-grpc-port 50002
       
       # Configure CORS for the inventory service
       - name: Configure CORS for Notification Service

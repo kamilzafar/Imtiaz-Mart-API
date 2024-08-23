@@ -71,7 +71,8 @@ jobs:
             --image ${{ secrets.DOCKER_HUB_USERNAME }}/userservice:latest \
             --target-port 8003 \
             --ingress 'external' \
-            --dapr enabled \
+            --enable-dapr 'true' \
+            --dapr-app-protocol 'http' \
             --dapr-app-id user-service \
             --dapr-app-port 8003 \
             --env-vars \
@@ -130,7 +131,8 @@ jobs:
             --image ${{ secrets.DOCKER_HUB_USERNAME }}/orderservice:latest \
             --target-port 8005 \
             --ingress 'external' \
-            --dapr enabled \
+            --enable-dapr 'true' \
+            --dapr-app-protocol 'http' \
             --dapr-app-id order-service \
             --dapr-app-port 8005 \
             --env-vars \
@@ -183,7 +185,8 @@ jobs:
             --image ${{ secrets.DOCKER_HUB_USERNAME }}/notificationservice:latest \
             --target-port 8007 \
             --ingress 'external' \
-            --dapr enabled \
+            --enable-dapr 'true' \
+            --dapr-app-protocol 'http' \
             --dapr-app-id notification-service \
             --dapr-app-port 8007 \
             --env-vars \

@@ -1,0 +1,18 @@
+apiVersion: dapr.io/v1alpha1
+kind: Subscription
+metadata:
+  name: combined-consumer-subscription
+spec:
+  pubsubname: user-service   # The name of the pubsub component for user service
+  topic: user_service         # The topic to subscribe to
+  route: /user/messages       # The route to receive user messages
+
+---
+apiVersion: dapr.io/v1alpha1
+kind: Subscription
+metadata:
+  name: combined-consumer-order-subscription
+spec:
+  pubsubname: order-service   # The name of the pubsub component for order service
+  topic: order_service         # The topic to subscribe to
+  route: /order/messages       # The route to receive order messages

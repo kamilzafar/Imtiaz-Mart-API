@@ -87,10 +87,7 @@ jobs:
               ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
               INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
               NOTIFICATION_SERVICE_URL=${{ secrets.NOTIFICATION_SERVICE_URL }} \
-            --dapr-invocation-port 3500 \
-            --dapr-http-port 3500 \
-            --dapr-grpc-port 50002
-
+            
       # Configure CORS for the user service
       - name: Configure CORS for User Service
         run: |
@@ -141,10 +138,7 @@ jobs:
               USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
               PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
               INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
-            --dapr-invocation-port 3501 \
-            --dapr-http-port 3501 \
-            --dapr-grpc-port 50002
-
+            
       # Configure CORS for the order service
       - name: Configure CORS for Order Service
         run: |
@@ -209,10 +203,7 @@ jobs:
               smtp_email=${{ secrets.SMTP_EMAIL }} \
               SMTP_PASSWORD=${{ secrets.SMTP_EMAIL }} \
               smtp_username=${{ secrets.SMTP_USERNAME }} \
-            --dapr-invocation-port 3502 \
-            --dapr-http-port 3502 \
-            --dapr-grpc-port 50002
-      
+            
       # Configure CORS for the inventory service
       - name: Configure CORS for Notification Service
         run: |

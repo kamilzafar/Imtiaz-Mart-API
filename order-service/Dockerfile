@@ -26,6 +26,8 @@ RUN poetry install --no-dev --no-root
 # Copy the application code
 COPY . /microservice3/
 
+COPY ./components /dapr/components
+
 # Expose the port the application runs on
 EXPOSE 8005
 

@@ -20,6 +20,12 @@ jobs:
         run: |
           echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
+
+      # Install Dapr CLI
+      - name: Install Dapr CLI
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/dapr/cli/master/install/install.sh | /bin/bash
+
       # Build and push the user service Docker image
       - name: Build and push User Service Docker image
         run: |
@@ -74,17 +80,10 @@ jobs:
               PAYMENT_SERVICE_URL=${{ secrets.PAYMENT_SERVICE_URL }} \
               ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
               INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
-              NOTIFICATION_SERVICE_URL=${{ secrets.NOTIFICATION_SERVICE_URL }} 
-
-      # Deploy Dapr Kafka Component for the Environment
-      # Deploy Dapr Kafka Component for the Environment
-      - name: Deploy Dapr Kafka Component for Environment
-        run: |
-          az containerapp env dapr-component set \
-            --name mycontainerappenv \
-            --resource-group myresourcegroup \
-            --dapr-component-name user-service \
-            --yaml ./user-service/components/pubsub.yaml
+              NOTIFICATION_SERVICE_URL=${{ secrets.NOTIFICATION_SERVICE_URL }} \
+              -dapr-invocation-port 3500 \
+              --dapr-http-port 3500 \
+              --dapr-grpc-port 50002
 
       # Configure CORS for the user service
       - name: Configure CORS for User Service
@@ -135,7 +134,10 @@ jobs:
               ORDER_SERVICE_KAFKA_ORDER_TOPIC=${{ secrets.ORDER_SERVICE_KAFKA_ORDER_TOPIC }} \
               USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
               PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
-              INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} 
+              INVENTORY_SERVICE_URL=${{ secrets.INVENTORY_SERVICE_URL }} \
+              -dapr-invocation-port 3501 \
+              --dapr-http-port 3501 \
+              --dapr-grpc-port 50002
 
       # Configure CORS for the order service
       - name: Configure CORS for Order Service
@@ -187,6 +189,8 @@ jobs:
             --image ${{ secrets.DOCKER_HUB_USERNAME }}/notificationservice:latest \
             --target-port 8007 \
             --ingress 'external' \
+            --dapr-app-id notification-service \
+            --dapr-app-port 8007 \
             --env-vars \
               INVENTORY_SERVICE_DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
               NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC = "user_service"
@@ -194,11 +198,14 @@ jobs:
               KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }}
               NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC }}
               NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID }}
-              smtp_server=${{ secrets.SMTP_SERVER }}
-              smtp_port=${{ secrets.SMTP_PORT }}
-              smtp_email=${{ secrets.SMTP_EMAIL }}
-              SMTP_PASSWORD=${{ secrets.SMTP_EMAIL }}
-              smtp_username=${{ secrets.SMTP_USERNAME }}
+              smtp_server=${{ secrets.SMTP_SERVER }} \
+              smtp_port=${{ secrets.SMTP_PORT }} \
+              smtp_email=${{ secrets.SMTP_EMAIL }} \
+              SMTP_PASSWORD=${{ secrets.SMTP_EMAIL }} \
+              smtp_username=${{ secrets.SMTP_USERNAME }} \
+              -dapr-invocation-port 3502 \
+              --dapr-http-port 3502 \
+              --dapr-grpc-port 50002
       
       # Configure CORS for the inventory service
       - name: Configure CORS for Notification Service

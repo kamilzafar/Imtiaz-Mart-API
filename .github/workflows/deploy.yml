@@ -61,6 +61,31 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
+      - name: Deploy Kafka
+        run: |
+          az container create \
+            --resource-group myresourcegroup \
+            --name broker \
+            --image ${{ secrets.DOCKER_HUB_USERNAME }}/kafka \
+            --ingress 'external' \
+            --ports 9092 \
+            --env-vars \
+              KAFKA_NODE_ID=1 \
+              KAFKA_LISTENER_SECURITY_PROTOCOL_MAP="CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT" \
+              KAFKA_ADVERTISED_LISTENERS="PLAINTEXT_HOST://localhost:9092,PLAINTEXT://broker:19092" \
+              KAFKA_PROCESS_ROLES="broker,controller" \
+              KAFKA_CONTROLLER_QUORUM_VOTERS="1@broker:29093" \
+              KAFKA_LISTENERS="CONTROLLER://:29093,PLAINTEXT_HOST://:9092,PLAINTEXT://:19092" \
+              KAFKA_INTER_BROKER_LISTENER_NAME="PLAINTEXT" \
+              KAFKA_CONTROLLER_LISTENER_NAMES="CONTROLLER" \
+              CLUSTER_ID="4L6g3nShT-eMCtK--X86sw" \
+              KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+              KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0 \
+              KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1 \
+              KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1 \
+              KAFKA_LOG_DIRS="/tmp/kraft-combined-logs"
+
+
       # Deploy the user service to Azure Container Apps
       - name: Deploy User Service to Azure Container Apps
         run: |
@@ -191,11 +216,11 @@ jobs:
             --dapr-app-port 3007 \
             --env-vars \
               INVENTORY_SERVICE_DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
-              NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC = "user_service"
-              NOTIFICATION_SERVICE_KAFKA_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_GROUP_ID }}
-              KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }}
-              NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC }}
-              NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID }}
+              NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC }} \
+              NOTIFICATION_SERVICE_KAFKA_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_GROUP_ID }} \
+              KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }} \
+              NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC }} \
+              NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID }} \
               smtp_server=${{ secrets.SMTP_SERVER }} \
               smtp_port=${{ secrets.SMTP_PORT }} \
               smtp_email=${{ secrets.SMTP_EMAIL }} \

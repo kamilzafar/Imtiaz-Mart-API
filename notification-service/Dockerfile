@@ -12,8 +12,16 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
+# Set the environment variable for dapr
+ENV PATH="/root/.dapr/bin:${PATH}"
+
 RUN wget -q https://raw.githubusercontent.com/dapr/cli/master/install/install.sh -O - | /bin/bash
 
+# Initialize dapr
+RUN dapr init --slim
+
+# Verify dapr installation
+RUN which dapr
 
 # Copy only the necessary files to install dependencies
 COPY pyproject.toml poetry.lock /microservice5/

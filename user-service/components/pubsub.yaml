@@ -1,13 +1,13 @@
 apiVersion: dapr.io/v1alpha1
 kind: Component
 metadata:
-  name: user-service
+  name: userservice
 spec:
   type: pubsub.kafka
   version: v1
   metadata:
   - name: brokers
-    value: "broker:19092"  # The internal Kafka broker address
+    value: "daprkafkabroker.servicebus.windows.net:9093"  # The internal Kafka broker address
   - name: consumerGroup
     value: "user_service_group"  # Name of the consumer group
   - name: topics
@@ -17,4 +17,4 @@ spec:
   - name: disableTls
     value: "true"  # Disable TLS if not using SSL
 scopes:
-- user-service
+- userservice

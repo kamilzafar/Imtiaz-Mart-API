@@ -1,0 +1,20 @@
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: notification-service-user-subscription
+spec:
+  topic: user_service         # The topic to subscribe to
+  route: 
+    default: /user/messages       # The route to receive user messages
+  pubsubname: user-service   # The name of the pubsub component for user service
+
+---
+apiVersion: dapr.io/v1alpha1
+kind: Component
+metadata:
+  name: notification-service-order-subscription
+spec:
+  topic: order_service         # The topic to subscribe to
+  route: 
+    default: /order/messages       # The route to receive order messages
+  pubsubname: order-service   # The name of the pubsub component for order service

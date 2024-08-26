@@ -33,20 +33,20 @@ def user_login(db: Session, form_data: OAuth2PasswordRequestForm):
     )
     return {"access_token": access_token, "refresh_token": refresh_token, "expires_in": access_token_expires+refresh_token_expires, "token_type": "bearer"}
 
-def publish_user_signup(user_data: User):
-    with DaprClient() as d:
-        user_message = user_pb2.User(
-            username=user_data.username,
-            email=user_data.email,
-        )
-        d.publish_event(
-            pubsub_name=settings.KAFKA_GROUP_ID,
-            topic_name=settings.KAFKA_PRODUCER_TOPIC,
-            data=user_message.SerializeToString(),
-            data_content_type='application/json',
-        )
+# def publish_user_signup(user_data: User):
+#     with DaprClient() as d:
+#         user_message = user_pb2.User(
+#             username=user_data.username,
+#             email=user_data.email,
+#         )
+#         d.publish_event(
+#             pubsub_name=settings.KAFKA_GROUP_ID,
+#             topic_name=settings.KAFKA_PRODUCER_TOPIC,
+#             data=user_message.SerializeToString(),
+#             data_content_type='application/json',
+#         )
         
-    print(f"Published user signup event for {user_data.username}")
+#     print(f"Published user signup event for {user_data.username}")
 
 async def signup_user(user: UserCreate, db: Session, producer: Annotated[AIOKafkaProducer, Depends(produce_message)]) -> User:
     """
@@ -68,7 +68,15 @@ async def signup_user(user: UserCreate, db: Session, producer: Annotated[AIOKafk
     hashed_password = get_password_hash(user.password)
 
     new_user = User(id = uuid4(), username=user.username, email=user.email, password=hashed_password, role=user.role)
-    publish_user_signup(new_user)
+    serialized_user = user_pb2.User(
+        username=new_user.username,
+        email=new_user.email,
+    )
+    producer.send_and_wait(
+        settings.KAFKA_PRODUCER_TOPIC, 
+        serialized_user.SerializeToString(),
+        )
+    # publish_user_signup(new_user)
     db.add(new_user)
     db.commit()
     db.refresh(new_user)

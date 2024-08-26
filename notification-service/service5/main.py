@@ -8,13 +8,12 @@ from service5.models.email_model import EmailSchema
 from service5.services import conf,send_email
 from service5.protobuf import user_pb2
 from service5.protobuf import order_pb2
-from dapr.ext.grpc import App
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting up")
-    # asyncio.create_task(user_consumer_task())
-    # asyncio.create_task(order_consumer_task())
+    asyncio.create_task(user_consumer_task())
+    asyncio.create_task(order_consumer_task())
     yield
 
 app = FastAPI(
@@ -26,41 +25,41 @@ app = FastAPI(
     )
 
 
-async def process_user_message(user_data):
-    user = user_pb2.User()
-    user.ParseFromString(user_data)
-    subject = "Welcome to KR Mart"
-    body = f"Hi {user.username},\n\nThank you for signing up with KR Mart!\n\nBest regards,\nKR Mart Team"
-    send_email(user.email, user.username, subject, body)
-    print(f"User message processed: {user.username}")
+# async def process_user_message(user_data):
+#     user = user_pb2.User()
+#     user.ParseFromString(user_data)
+#     subject = "Welcome to KR Mart"
+#     body = f"Hi {user.username},\n\nThank you for signing up with KR Mart!\n\nBest regards,\nKR Mart Team"
+#     send_email(user.email, user.username, subject, body)
+#     print(f"User message processed: {user.username}")
 
-# Example function to process order messages
-async def process_order_message(msg):
-    order_data = order_pb2.Order()  # Assuming you have an Order message in order.proto
-    order_data.ParseFromString(msg.value)
-    subject = "Order Confirmation"
-    body = f"Hi {order_data.username},\n\nYour order {order_data.order_id} has been placed successfully!\n\nBest regards,\nKR Mart Team"
-    send_email(order_data.useremail, order_data.username, subject, body)
-    print(f"Order message processed: {order_data.order_id}")
-    print(f"Order message processed: {order_data.order_id}")
+# # Example function to process order messages
+# async def process_order_message(msg):
+#     order_data = order_pb2.Order()  # Assuming you have an Order message in order.proto
+#     order_data.ParseFromString(msg.value)
+#     subject = "Order Confirmation"
+#     body = f"Hi {order_data.username},\n\nYour order {order_data.order_id} has been placed successfully!\n\nBest regards,\nKR Mart Team"
+#     send_email(order_data.useremail, order_data.username, subject, body)
+#     print(f"Order message processed: {order_data.order_id}")
+#     print(f"Order message processed: {order_data.order_id}")
 
-# Route to receive user messages
-@app.post("/user/messages")
-async def user_messages(request: Request):
-    msg = await request.json()
-    # Convert to your desired format or use directly
-    user_data = msg  # Replace with your own deserialization if needed
-    asyncio.create_task(process_user_message(user_data))
-    return {"status": "User message received"}
+# # Route to receive user messages
+# @app.post("/user/messages")
+# async def user_messages(request: Request):
+#     msg = await request.json()
+#     # Convert to your desired format or use directly
+#     user_data = msg  # Replace with your own deserialization if needed
+#     asyncio.create_task(process_user_message(user_data))
+#     return {"status": "User message received"}
 
-# Route to receive order messages
-@app.post("/order/messages")
-async def order_messages(request: Request):
-    msg = await request.json()
-    # Convert to your desired format or use directly
-    order_data = msg  # Replace with your own deserialization if needed
-    asyncio.create_task(process_order_message(order_data))
-    return {"status": "Order message received"}
+# # Route to receive order messages
+# @app.post("/order/messages")
+# async def order_messages(request: Request):
+#     msg = await request.json()
+#     # Convert to your desired format or use directly
+#     order_data = msg  # Replace with your own deserialization if needed
+#     asyncio.create_task(process_order_message(order_data))
+#     return {"status": "Order message received"}
 
 
 @app.get("/", tags=["Root"])

@@ -68,14 +68,12 @@ async def signup_user(user: UserCreate, db: Session, producer: Annotated[AIOKafk
     hashed_password = get_password_hash(user.password)
 
     new_user = User(id = uuid4(), username=user.username, email=user.email, password=hashed_password, role=user.role)
-    serialized_user = user_pb2.User(
+    user = user_pb2.User(
         username=new_user.username,
         email=new_user.email,
     )
-    producer.send_and_wait(
-        settings.KAFKA_PRODUCER_TOPIC, 
-        serialized_user.SerializeToString(),
-        )
+    serialized_user = user.SerializeToString()
+    await producer.send_and_wait(settings.KAFKA_PRODUCER_TOPIC, serialized_user)
     # publish_user_signup(new_user)
     db.add(new_user)
     db.commit()

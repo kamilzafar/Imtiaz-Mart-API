@@ -1,15 +1,18 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.security import OAuth2PasswordBearer
-from service6.db import create_db_and_tables
+# from service6.db import create_db_and_tables
 from contextlib import asynccontextmanager
-from service6.service import *
+from service6.model import Order, User
+from service6.service import generate_checkout_session, service_get_order, get_current_user
+from service6 import settings
 import json
 import stripe
+from typing import Annotated
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Creating database connection")
-    create_db_and_tables()
+    # create_db_and_tables()
     yield
 
 app = FastAPI(
@@ -20,29 +23,19 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-
-
-oauth_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.USER_SERVICE_URL}/auth/login")
 stripe.api_key = settings.SECRET_KEY_STRIPE
-
 
 @app.get("/", tags=["Root"])
 def get_root():
-    return {"service": "Payment Service"}
+  return {"service": "Payment Service"}
 
 
 
 @app.post("/payment")
-def process_payment(order_id:int):
-    order = service_get_order(order_id)
-    orderitems = service_get_order_item(order_id)
-    product_id = 
-    product = service_get_product(product_id)
-    for orderitem in orderitems:
-      payment = generate_checkout_session(order_id)
-    return payment
-
-
+def process_payment(order_id: int, user: Annotated[User, Depends(get_current_user)]):
+  order: Order = service_get_order(order_id, user)
+  payment = generate_checkout_session(order)
+  return payment
 
 
 # This is your Stripe CLI webhook secret for testing your endpoint locally.

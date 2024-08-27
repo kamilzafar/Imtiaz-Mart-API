@@ -13,7 +13,7 @@ import service3.protobuf.order_pb2 as order_pb2
 from aiokafka import AIOKafkaProducer
 from service3.kafka.producer import produce_message
 
-oauth_scheme = OAuth2PasswordBearer(tokenUrl=f"{setting.USER_SERVICE_URL}/auth/login")
+oauth_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 def get_product(product_id: int) -> Product:

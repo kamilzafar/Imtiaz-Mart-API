@@ -100,31 +100,33 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8003:8003"
+    env_file:
+      - ./user-service/.env
     volumes:
       - ./user-service:/microservice1/
     depends_on:
       - postgres_db
       - broker
-      - redis
-      - dapr_sidecar
+      # - redis
+      # - dapr_sidecar
 
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
+  # redis:
+  #   image: redis:latest
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis-data:/data
 
-  dapr_sidecar:
-    image: daprio/daprd:latest
-    command: ["./daprd", "-app-id", "user-service", "-app-port", "3003", "-dapr-http-port", "3500", "-dapr-grpc-port", "50006"]
-    ports:
-      - "3500:3500"
-      - "50006:50006"
-    volumes:
-      - ./user-service/components:/dapr/components
-    depends_on:
-      - redis
+  # dapr_sidecar:
+  #   image: daprio/daprd:latest
+  #   command: ["./daprd", "-app-id", "user-service", "-app-port", "3003", "-dapr-http-port", "3500", "-dapr-grpc-port", "50006"]
+  #   ports:
+  #     - "3500:3500"
+  #     - "50006:50006"
+  #   volumes:
+  #     - ./user-service/components:/dapr/components
+  #   depends_on:
+  #     - redis
 
   service2:
     image: kamilzafar/productservice:latest
@@ -133,6 +135,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8004:8004"
+    env_file:
+      - ./product-service/.env
     volumes:
       - ./product-service:/microservice2/
     depends_on:
@@ -145,23 +149,25 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8005:8005"
+    env_file:
+      - ./order-service/.env
     volumes:
       - ./order-service:/microservice3/
     depends_on:
       - postgres_db
       - broker
-      - dapr_order_sidecar
+      # - dapr_order_sidecar
 
-  dapr_order_sidecar:
-    image: daprio/daprd:latest
-    command: ["./daprd", "-app-id", "order-service", "-app-port", "3005", "-dapr-http-port", "3501", "-dapr-grpc-port", "50007"]
-    ports:
-      - "3501:3501"
-      - "50007:50007"
-    volumes:
-      - ./order-service/components:/dapr/components
-    depends_on:
-      - redis
+  # dapr_order_sidecar:
+  #   image: daprio/daprd:latest
+  #   command: ["./daprd", "-app-id", "order-service", "-app-port", "3005", "-dapr-http-port", "3501", "-dapr-grpc-port", "50007"]
+  #   ports:
+  #     - "3501:3501"
+  #     - "50007:50007"
+  #   volumes:
+  #     - ./order-service/components:/dapr/components
+  #   depends_on:
+  #     - redis
 
   service4:
     image: kamilzafar/inventoryservice:latest
@@ -170,6 +176,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8006:8006"
+    env_file:
+      - ./inventory-service/.env
     volumes:
       - ./inventory-service:/microservice4/
     depends_on:
@@ -182,29 +190,33 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8007:8007"
+    env_file:
+      - ./notification-service/.env
     volumes:
       - ./notification-service:/microservice5/
     depends_on:
       - postgres_db
       - broker
-      - dapr_notification_sidecar
+      # - dapr_notification_sidecar
 
-  dapr_notification_sidecar:
-    image: daprio/daprd:latest
-    command: ["./daprd", "-app-id", "notification-service", "-app-port", "3007", "-dapr-http-port", "3502", "-dapr-grpc-port", "50008"]
-    ports:
-      - "3502:3502"
-      - "50008:50008"
-    volumes:
-      - ./notification-service/components:/dapr/components
-    depends_on:
-      - redis
+  # dapr_notification_sidecar:
+  #   image: daprio/daprd:latest
+  #   command: ["./daprd", "-app-id", "notification-service", "-app-port", "3007", "-dapr-http-port", "3502", "-dapr-grpc-port", "50008"]
+  #   ports:
+  #     - "3502:3502"
+  #     - "50008:50008"
+  #   volumes:
+  #     - ./notification-service/components:/dapr/components
+  #   depends_on:
+  #     - redis
 
   service6:
     image: kamilzafar/paymentservice:latest
     build:
       context: ./payment-service
       dockerfile: Dockerfile
+    env_file:
+      - ./payment-service/.env
     ports:
       - "8008:8008"
     volumes:

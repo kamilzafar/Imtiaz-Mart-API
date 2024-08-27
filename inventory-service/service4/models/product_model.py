@@ -12,9 +12,9 @@ class Category(str, Enum):
 class ProductBase(SQLModel):
     name: str
     description: str
-    price: int
+    price: float
     category: Category
-    image_id: int = Field()
+    quantity: int
 
 class Product(ProductBase):
     id: Optional[int] = Field(default=None, primary_key=True, index=True)

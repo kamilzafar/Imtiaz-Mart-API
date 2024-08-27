@@ -30,4 +30,4 @@ COPY . /microservice4/
 EXPOSE 8006
 
 # Define the command to run the application
-CMD ["poetry", "run", "uvicorn", "service4.main:app", "--host", "0.0.0.0", "--port", "8006"]
+CMD ["poetry", "run", "uvicorn", "service4.main:app", "--host", "0.0.0.0", "--port", "8006", "--reload"]

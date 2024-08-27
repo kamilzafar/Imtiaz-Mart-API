@@ -12,7 +12,7 @@ from service1.services import create_access_token, get_password_hash, get_user_b
 from service1.models.user_models import TokenData, User, UserCreate, UserUpdate, Userlogin
 from service1 import user_pb2 as user_pb2
 from typing import Annotated
-from dapr.clients import DaprClient 
+# from dapr.clients import DaprClient 
 from service1 import settings
 
 def user_login(db: Session, form_data: OAuth2PasswordRequestForm):

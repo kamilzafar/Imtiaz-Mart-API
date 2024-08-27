@@ -20,12 +20,6 @@ jobs:
         run: |
           echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
-
-      # Install Dapr CLI
-      - name: Install Dapr CLI
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/dapr/cli/master/install/install.sh | /bin/bash
-
       # Build and push the user service Docker image
       - name: Build and push User Service Docker image
         run: |
@@ -71,10 +65,6 @@ jobs:
             --image ${{ secrets.DOCKER_HUB_USERNAME }}/userservice:latest \
             --target-port 8003 \
             --ingress 'external' \
-            --enable-dapr 'true' \
-            --dapr-app-protocol 'http' \
-            --dapr-app-id user-service \
-            --dapr-app-port 3003 \
             --env-vars \
               USER_SERVICE_DATABASE_URL=${{ secrets.USER_SERVICE_DATABASE_URL }} \
               SECRET_KEY=${{ secrets.SECRET_KEY }} \
@@ -132,10 +122,6 @@ jobs:
             --image ${{ secrets.DOCKER_HUB_USERNAME }}/orderservice:latest \
             --target-port 8005 \
             --ingress 'external' \
-            --enable-dapr 'true' \
-            --dapr-app-protocol 'http' \
-            --dapr-app-id order-service \
-            --dapr-app-port 3005 \
             --env-vars \
               ORDER_SERVICE_DATABASE_URL=${{ secrets.ORDER_SERVICE_DATABASE_URL }} \
               KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }} \
@@ -186,10 +172,6 @@ jobs:
             --image ${{ secrets.DOCKER_HUB_USERNAME }}/notificationservice:latest \
             --target-port 8007 \
             --ingress 'external' \
-            --enable-dapr 'true' \
-            --dapr-app-protocol 'http' \
-            --dapr-app-id notification-service \
-            --dapr-app-port 3007 \
             --env-vars \
               INVENTORY_SERVICE_DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
               NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC }} \
@@ -212,25 +194,26 @@ jobs:
             --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} ${{ secrets.NOTIFICATION_SERVICE_URL }}
             
       # Deploy the payment service to Azure Container Apps
-      # - name: Deploy Payment Service to Azure Container Apps
-      #   run: |
-      #     az containerapp create \
-      #       --name service6 \
-      #       --resource-group myresourcegroup \
-      #       --environment mycontainerappenv \
-      #       --image ${{ secrets.DOCKER_HUB_USERNAME }}/paymentservice:latest \
-      #       --target-port 8006 \
-      #       --ingress 'external' \
-      #       --env-vars \
-      #         INVENTORY_SERVICE_DATABASE_URL=${{ secrets.INVENTORY_SERVICE_DATABASE_URL }} \
-      #         USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
-      #         PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
-      #         ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} 
+      - name: Deploy Payment Service to Azure Container Apps
+        run: |
+          az containerapp create \
+            --name service6 \
+            --resource-group myresourcegroup \
+            --environment mycontainerappenv \
+            --image ${{ secrets.DOCKER_HUB_USERNAME }}/paymentservice:latest \
+            --target-port 8008 \
+            --ingress 'external' \
+            --env-vars \
+              USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
+              PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
+              ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
+              WB_SECRET_KEY=${{ secrets.WB_SECRET_KEY }} \
+              SECRET_KEY_STRIPE=${{ secrets.SECRET_KEY_STRIPE }} 
       
-      # # Configure CORS for the inventory service
-      # - name: Configure CORS for Payment Service
-      #   run: |
-      #     az containerapp ingress cors enable \
-      #       --name service6 \
-      #       --resource-group myresourcegroup \
-      #       --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} 
+      # Configure CORS for the inventory service
+      - name: Configure CORS for Payment Service
+        run: |
+          az containerapp ingress cors enable \
+            --name service6 \
+            --resource-group myresourcegroup \
+            --allowed-origins ${{ secrets.USER_SERVICE_URL }} ${{ secrets.PRODUCT_SERVICE_URL }} ${{ secrets.ORDER_SERVICE_URL }} 

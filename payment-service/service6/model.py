@@ -1,10 +1,10 @@
 from typing import Optional
 from uuid import UUID
-from sqlmodel import SQLModel,Field,Column
-from enum import Enum
+from sqlmodel import SQLModel,Field,Column, Enum
+import enum
 
 
-class OrderStatus(str,Enum):
+class OrderStatus(str, enum.Enum):
     PENDING: str = "pending"
     CANCELLED: str = "cancelled"
     DELIVERED: str = "delivered"
@@ -43,7 +43,7 @@ class OrderItem(SQLModel):
 class OrderItemCreate(OrderBase):
     pass
 
-class Category(str, Enum):
+class Category(str, enum.Enum):
     electronics = "electronics"
     clothing = "clothing"
     food = "food"
@@ -67,3 +67,10 @@ class ProductCreate(ProductBase):
 
 class ProductUpdate(ProductBase):
     pass
+
+class User(SQLModel):
+    id: Optional[UUID] = Field(primary_key=True, index=True)
+    email: str = Field(index=True, unique=True, nullable=False)
+    username: str = Field(nullable=False)
+    password: str = Field(nullable=False)
+    role: str = Field(default="user")

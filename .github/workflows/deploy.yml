@@ -175,15 +175,15 @@ jobs:
             --env-vars \
               NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC }} \
               NOTIFICATION_SERVICE_KAFKA_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_GROUP_ID }} \
-              KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }} \
               NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC }} \
               NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID }} \
-              smtp_server=${{ secrets.SMTP_SERVER }} \
-              smtp_port=${{ secrets.SMTP_PORT }} \
-              smtp_email=${{ secrets.SMTP_EMAIL }} \
+              KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }} \
+              SMTP_SERVER=${{ secrets.SMTP_SERVER }} \
+              SMTP_PORT=${{ secrets.SMTP_PORT }} \
+              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }} \
               SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }} \
-              smtp_username=${{ secrets.SMTP_USERNAME }} 
-            
+              SMTP_EMAIL=${{ secrets.SMTP_EMAIL }} 
+              
       # Configure CORS for the inventory service
       - name: Configure CORS for Notification Service
         run: |

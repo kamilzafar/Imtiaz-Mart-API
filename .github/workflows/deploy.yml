@@ -173,17 +173,17 @@ jobs:
             --target-port 8007 \
             --ingress 'external' \
             --env-vars \
-              NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC }} \
-              NOTIFICATION_SERVICE_KAFKA_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_GROUP_ID }} \
-              NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC }} \
-              NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID }} \
-              KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }} \
-              SMTP_SERVER=${{ secrets.SMTP_SERVER }} \
-              SMTP_PORT=${{ secrets.SMTP_PORT }} \
-              SMTP_USERNAME=${{ secrets.SMTP_USERNAME }} \
-              SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }} \
-              SMTP_EMAIL=${{ secrets.SMTP_EMAIL }} 
-              
+                NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_CONSUMER_TOPIC }} \
+                NOTIFICATION_SERVICE_KAFKA_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_GROUP_ID }} \
+                NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_TOPIC }} \
+                NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID=${{ secrets.NOTIFICATION_SERVICE_KAFKA_ORDER_GROUP_ID }} \
+                KAFKA_BOOTSTRAP_SERVER=${{ secrets.KAFKA_BOOTSTRAP_SERVER }} \
+                SMTP_SERVER=${{ secrets.SMTP_SERVER }} \
+                SMTP_PORT=${{ secrets.SMTP_PORT }} \
+                SMTP_USERNAME=${{ secrets.SMTP_USERNAME }} \
+                SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }} \
+                SMTP_EMAIL=${{ secrets.SMTP_EMAIL }} 
+
       # Configure CORS for the inventory service
       - name: Configure CORS for Notification Service
         run: |
@@ -203,12 +203,12 @@ jobs:
             --target-port 8008 \
             --ingress 'external' \
             --env-vars \
-              USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
-              PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
-              ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
-              WB_SECRET_KEY=${{ secrets.WB_SECRET_KEY }} \
-              SECRET_KEY_STRIPE=${{ secrets.SECRET_KEY_STRIPE }} 
-      
+                USER_SERVICE_URL=${{ secrets.USER_SERVICE_URL }} \
+                PRODUCT_SERVICE_URL=${{ secrets.PRODUCT_SERVICE_URL }} \
+                ORDER_SERVICE_URL=${{ secrets.ORDER_SERVICE_URL }} \
+                WB_SECRET_KEY=${{ secrets.WB_SECRET_KEY }} \
+                SECRET_KEY_STRIPE=${{ secrets.SECRET_KEY_STRIPE }} 
+        
       # Configure CORS for the inventory service
       - name: Configure CORS for Payment Service
         run: |
